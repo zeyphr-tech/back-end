@@ -4,8 +4,8 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "srirangankannan31@gmail.com",
-    pass: "gqod gvov zpef mhmo", // Set this in your .env file
-  },
+    pass: process.env.EMAIL_PASSKEY, // Set this in your .env file
+  }
 });
 
 export const sendOtpEmail = async (email: string, otp: string) => {

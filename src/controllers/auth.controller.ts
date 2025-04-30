@@ -2,12 +2,18 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { fetchUser, saveToken } from "../config/db";
 import { signToken } from "../services/token.service";
+import { userSchema } from "../schema/user.schema";
 
 export const loginUser = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const { emailAddress, password } = req.body;
+
+  const validatedData = userSchema.safeParse(req.body);
+  if (!validatedData.success) {
+    return res.status(400).json({ error: validatedData.error.message }); 
+  }
+  const { emailAddress, password } = validatedData.data;
 
   if (!emailAddress || !password) {
     return res.status(400).json({ error: "Email and password are required" });
@@ -23,7 +29,7 @@ export const loginUser = async (
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const payload = { _id: user._id, publicKey: user.publicKey };
+  const payload = { _id: user._id, publicKey: user.publicKey, privateKey: user.pwdEncryptedPrivateKey };
   const token = signToken(payload);
 
   // Save the token in DB (tokens table)

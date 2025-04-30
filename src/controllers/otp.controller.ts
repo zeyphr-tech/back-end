@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { createOtp, validateOtpService } from "../services/otp.service"; // example service import
-import { z } from "zod";
+import { otpSchema, otpValidateSchema } from "../schema/otp.schema";
 import { sendOtpEmail } from "../utils/email";
 import { v4 as uuidv4 } from "uuid";
-
 import  { saveOtp } from "../config/db"
 
 // Generate OTP and send to email
@@ -12,11 +11,9 @@ export const generateOtp = async (
   res: Response
 ): Promise<void> => {
   try {
-    // Define schema
-    const emailSchema = z.string().email({ message: "Invalid email address" });
-
+    
     // Validate email from request body
-    const validatedData = emailSchema.safeParse(req.body.emailAddress);
+    const validatedData = otpSchema.safeParse(req.body.emailAddress);
 
     if (!validatedData.success) {
       res.status(400).json({
@@ -26,7 +23,7 @@ export const generateOtp = async (
       return;
     }
 
-    const emailAddress = validatedData.data;
+    const {emailAddress} = validatedData.data;
 
     // Generate UID and create OTP
     const otp = await createOtp(); // Make sure this function handles OTP creation/send
@@ -48,6 +45,15 @@ export const validateOtp = async (
   res: Response
 ): Promise<void> => {
   try {
+    const validatedData = otpValidateSchema.safeParse(req.body);
+
+    if (!validatedData.success) {
+      res.status(400).json({
+        success: false,
+        error: validatedData.error.message,
+      });
+      return;
+    }
     const { uid, otp } = req.body;
     const isVerified = await validateOtpService(uid, otp); // Assuming service logic validates OTP
     if (isVerified) {

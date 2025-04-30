@@ -10,6 +10,7 @@ import { fetchUser, saveToken, saveUser, updateUserInDb } from "../config/db";
 import { encryptPrivateKey } from "../services/crypto.service";
 import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
+import { userSchema } from "../schema/user.schema";
 
 // GET /api/users/:emailAddress
 export const checkUserExists = async (
@@ -23,7 +24,12 @@ export const checkUserExists = async (
 
 // POST /api/users
 export const registerUser = async (req: Request, res: Response): Promise<any> => {
-  const { emailAddress, password } = req.body;
+
+  const validatedData = userSchema.safeParse(req.body);
+  if (!validatedData.success) {
+    return res.status(400).json({ error: validatedData.error.message }); 
+  }
+  const { emailAddress, password } = validatedData.data;
 
   if (!emailAddress || !password) {
     return res.status(400).json({ error: "Email and password are required" });
@@ -57,7 +63,11 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
     return res.status(500).json({ error: "Failed to register user" });
   }
 
-  let token = signToken({ _id: newUser._id.toString() ,publicKey});
+  let token = signToken({
+    _id: newUser._id.toString(),
+    publicKey,
+    encryptedPrivateKey,
+  });
   // Save the token in DB (tokens table)
   await saveToken(newUser._id.toString(), token);
 
