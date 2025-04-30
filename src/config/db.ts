@@ -1,0 +1,102 @@
+import { User } from "../models/User";
+import { Token } from "../models/Token";
+import { OTP } from "../models/Otp";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
+// Connect to the database
+export const connectDb = async () => {
+  try {
+    const dbURI = process.env.MONGODB_URI;
+    if (!dbURI) {
+      throw new Error("Mongo URI is not provided in .env file");
+    }
+    await mongoose.connect(dbURI);
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1); // Exit the process if DB connection fails
+  }
+};
+
+export const saveUser = async ({
+  username,
+  emailAddress,
+  passwordHash,
+  publicKey,
+  pwdEncryptedPrivateKey,
+}: {
+  username: string;
+  emailAddress: string;
+  passwordHash: string;
+  publicKey: string;
+  pwdEncryptedPrivateKey: string;
+}) => {
+  const newUser = new User({
+    username,
+    emailAddress,
+    passwordHash,
+    publicKey,
+    pwdEncryptedPrivateKey,
+  });
+
+  return await newUser.save();
+};
+
+
+export const fetchUser = async (emailAddress: string) => {
+  return await User.findOne({ emailAddress });
+};
+
+// Token operations
+export const saveToken = async (userId: string, token: string) => {
+  return await Token.findOneAndUpdate(
+    { _id: userId },
+    { $push: { tokens: token } },
+    { upsert: true, new: true }
+  );
+};
+export const fetchToken = async (userId: mongoose.Types.ObjectId) => {
+  return await Token.findOne({ userId }); // Fetch the latest token
+};
+
+// OTP operations
+
+export const saveOtp = async (
+  otp: string,
+  uid: string
+) => {
+  const newOtp = new OTP({    
+    otp,
+    uid,
+  });
+  return await newOtp.save();
+};
+
+export const fetchOtpByUid = async (uid: string) => {
+  return await OTP.findOne({ uid });
+};
+
+export const fetchOtpByEmail = async (emailAddress: string) => {
+  return await OTP.findOne({ emailAddress }).sort({ createdAt: -1 }); // Fetch the latest OTP for the email
+};
+
+// Utility function to delete expired OTPs (optional)
+export const deleteExpiredOtps = async () => {
+  const expirationTime = new Date();
+  expirationTime.setMinutes(expirationTime.getMinutes() - 10); // 10 minutes expiration time for OTPs
+  await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
+};
+
+
+export const updateUserInDb = async (
+  _id: string,
+  updates: Record<string, any>
+) => {
+  return await User.findOneAndUpdate(
+    { _id },
+    { $set: updates, updatedAt: new Date() },
+    { new: true }
+  );
+};
