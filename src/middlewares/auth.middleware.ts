@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { match } from "path-to-regexp";
 import { decodeToken } from "../services/token.service";
 
@@ -8,7 +7,7 @@ const whitelist = [
   "/api/otp/validate",
   "/api/auth/login",
   "/api/users/:emailAddress",
-  "/api/users/"
+  "/api/users"
 ];
 
 const isWhitelisted = (path: string) => {
