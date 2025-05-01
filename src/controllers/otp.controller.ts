@@ -13,7 +13,7 @@ export const generateOtp = async (
   try {
     
     // Validate email from request body
-    const validatedData = otpSchema.safeParse(req.body.emailAddress);
+    const validatedData = otpSchema.safeParse(req.body);
 
     if (!validatedData.success) {
       res.status(400).json({

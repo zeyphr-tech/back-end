@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import path from "path";
+import fs from "fs/promises";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,12 +11,20 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendOtpEmail = async (email: string, otp: string) => {
+  const htmlFilePath = path.join(__dirname, "otp_email_template.html");
+
+  // Read the HTML file content
+  const htmlContent = await fs.readFile(htmlFilePath, { encoding: "utf8" });
+
+  // Replace the placeholder with the actual OTP value
+  const htmlWithOtp = htmlContent.replace("${otp}", otp);
+
   const mailOptions = {
     from: "srirangankannan31@gmail.com",
     to: email,
-    subject: "Your OTP Code",
+    subject: `Your One-Time Password (OTP) for Zeyphr`,
     text: `Your OTP code is: ${otp}`,
-    html: `<p>Your OTP code is: <strong>${otp}</strong></p>`,
+    html: htmlWithOtp,
   };
 
   try {

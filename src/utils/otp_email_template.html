@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your OTP Code</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: left; /* Changed to left alignment */
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .otp-box {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 8px;
+            letter-spacing: 10px; /* To space out the digits */
+            margin-bottom: 25px;
+            display: inline-block;
+            text-align: center; /* Keep the OTP itself centered within its box */
+        }
+
+        .note {
+            color: #777;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h1>Your One-Time Password (OTP)</h1>
+        <p>Hi there,</p>
+        <p>Thank you for your request. Please use the following One-Time Password (OTP) to proceed:</p>
+        <div class="otp-box">${otp}</div>
+        <p>This OTP is valid for a short period. Please do not share it with anyone.
+        <p class="note">If you did not request this OTP, you can safely ignore this email.</p>
+        <p>Best regards,<br>Zeyphr Team</p>
+    </div>
+</body>
+</html>

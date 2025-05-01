@@ -18,9 +18,9 @@ app.use("/api/otp", otpRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-
-app.listen(3000, async() => {
-  console.log("Server is running on port 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async() => {
+  console.log(`Server is running on port ${PORT}`);
   await connectDb();
 
 })
