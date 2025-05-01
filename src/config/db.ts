@@ -49,6 +49,10 @@ export const fetchUser = async (emailAddress: string) => {
   return await User.findOne({ emailAddress });
 };
 
+export const fetchUserByPubKey = async (publicKey: string) => {
+  return await User.findOne({ publicKey });
+};
+
 // Token operations
 export const saveToken = async (userId: string, token: string) => {
   return await Token.findOneAndUpdate(
