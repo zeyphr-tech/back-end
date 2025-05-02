@@ -107,7 +107,8 @@ export const updateUserInDb = async (
 };
 interface TransactionInput {
   transactionID: string;
-  paymentMethod: "card" | "wallet" | "upi" | "bank_transfer" | "cash";
+  paymentMethod: "card" | "wallet" | "upi" | "qr" | "cash";
+  merchantEmail?: string;
   amount: number;
   currency: string;
   status?: "pending" | "success" | "failed"; // optional, defaults to "pending"
@@ -116,12 +117,12 @@ interface TransactionInput {
 
 interface TransactionUpdateInput {
   status?: "pending" | "success" | "failed";
-  paymentMethod?: "card" | "wallet" | "upi" | "bank_transfer" | "cash";
+  paymentMethod?: "card" | "wallet" | "upi" | "qr" | "cash";
+  merchantEmail?: string;
   amount?: number;
   currency?: string;
   errorMessage?: string;
-  userId?: string;
-  merchantId?: string;
+  userEmail?: string;
   createdAt?: Date;
   // add more fields here if needed
 }
@@ -130,6 +131,7 @@ interface TransactionUpdateInput {
 export const createTransaction = async (data: TransactionInput) => {
   const {
     transactionID,
+    merchantEmail,
     paymentMethod,
     amount,
     currency,
@@ -139,6 +141,7 @@ export const createTransaction = async (data: TransactionInput) => {
 
   const newTx = new Transaction({
     transactionID,
+    merchantEmail,
     paymentMethod,
     amount,
     currency,
@@ -160,8 +163,8 @@ export const updateTransaction = async (
 ) => {
   return await Transaction.findOneAndUpdate(
     { transactionID },
-    { ...updateFields, updatedAt: new Date() },
-    { new: true }
+    { ...updateFields, transactionID, updatedAt: new Date() },
+    { new: true, upsert: true }
   );
 };
 

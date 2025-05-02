@@ -1,38 +1,47 @@
 import crypto from "crypto";
+import dotenv from "dotenv";
+dotenv.config();
 
-function deriveKeyAndIV(password: string) {
-  const hash = crypto.createHash("sha512").update(password).digest();
-  const key = hash.slice(0, 32); // 32 bytes = 256-bit key
-  const iv = hash.slice(32, 32 + 12); // 12 bytes = 96-bit IV (GCM)
-  return { key, iv };
+const SECRET_KEY = process.env.SECRET_KEY || "your_32_byte_secret_key_goes_here_!!!";
+
+function deriveKey(password: string, salt: string): Buffer {
+  return crypto.scryptSync(password, salt, 32);
 }
 
-// Encrypts and returns a single hex string: [ciphertext_hex].[authTag_hex]
 export function encryptPrivateKey(
   privateKey: string,
   password: string
 ): string {
-  const { key, iv } = deriveKeyAndIV(password);
+  const key = deriveKey(password, SECRET_KEY);
+  const iv = crypto.randomBytes(12); 
+
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
   const encrypted = Buffer.concat([
     cipher.update(privateKey, "utf8"),
     cipher.final(),
   ]);
   const authTag = cipher.getAuthTag();
-  return `${encrypted.toString("hex")}.${authTag.toString("hex")}`;
+
+  // Concatenate IV, ciphertext, and auth tag
+  return `${iv.toString("hex")}.${encrypted.toString("hex")}.${authTag.toString(
+    "hex"
+  )}`;
 }
 
-// Decrypts using the combined hex string
 export function decryptPrivateKey(
   encryptedString: string,
   password: string
 ): string {
-  const [ciphertextHex, authTagHex] = encryptedString.split(".");
-  const { key, iv } = deriveKeyAndIV(password);
+  const [ivHex, ciphertextHex, authTagHex] = encryptedString.split(".");
+  const key = deriveKey(password, SECRET_KEY);
+  const iv = Buffer.from(ivHex, "hex");
+  const authTag = Buffer.from(authTagHex, "hex");
+  const ciphertext = Buffer.from(ciphertextHex, "hex");
+
   const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
+  decipher.setAuthTag(authTag);
   const decrypted = Buffer.concat([
-    decipher.update(Buffer.from(ciphertextHex, "hex")),
+    decipher.update(ciphertext),
     decipher.final(),
   ]);
   return decrypted.toString("utf8");

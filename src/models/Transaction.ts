@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
+import { string } from "zod";
 
 const transactionSchema = new mongoose.Schema({
   transactionID: { type: String, required: true, unique: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  merchantId: { type: mongoose.Schema.Types.ObjectId, ref: "Merchant" }, // optional
+  userEmail: { type: String, required: false },
+  merchantEmail: { type: String, ref: "Merchant" }, // optional
   amount: { type: Number, required: true },
-  currency: { type: String, default: "USD" },
+  currency: { type: String, default: "ETH" },
   paymentMethod: {
     type: String,
-    enum: ["card", "wallet", "upi", "bank_transfer", "cash"],
+    enum: ["card", "wallet","qr"],
     required: true,
   },
   status: {

@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-router.post("/new", newTransaction);
+router.post("/card/new", newTransaction);
 router.post('/scan/new',initiateTransaction)
 router.post('/status/', getTransactionStatus)
 router.put('/update', updateTransactionStatus)

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ethers } from "ethers";
+import { v4 as uuidV4 } from "uuid";
 import { transferEther } from "../services/transfer.service"; // adjust path if needed
 import { machineScannerSchema, machineSchema } from "../schema/machine.schema";
 import {
@@ -13,47 +14,78 @@ import { fetchUserByPubKey } from "../config/db";
 import { handleCustomError } from "../utils/error.util";
 
 
-export const newTransaction = async (req: Request, res: Response):Promise<any> => {
+export const newTransaction = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const validatedData = machineSchema.parse(req.body);
     if (!validatedData) {
       return res.status(400).json({ error: "Invalid data" });
     }
+
     const { publicKey, privateKey, merchantPublicKey, amount } = validatedData;
 
-    // Basic sanity check
+    // Sanity check for addresses
     if (!ethers.isAddress(publicKey) || !ethers.isAddress(merchantPublicKey)) {
       return res.status(400).json({ error: "Invalid User" });
     }
 
-    let user = await fetchUserByPubKey(publicKey);
+    const user = await fetchUserByPubKey(publicKey);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Trigger transaction
-    const tx = await transferEther(merchantPublicKey, amount, privateKey);
+    let tx: any;
+    let transactionStatus = "success";
+    let errorMessage = "";
+    let err;
 
-    let response = {
+    try {
+      tx = await transferEther(merchantPublicKey, amount, privateKey);
+    } catch (error: any) {
+      transactionStatus = "failure";
+      err = error;
+      errorMessage = error.message;
+    }
+
+    const updateTransaction_data: any = {
+      status: transactionStatus,
+      paymentMethod: "card",
+      merchantEmail: user.emailAddress,
+      amount,
+      currency: "ETH",
+      errorMessage,
+      userEmail: user.emailAddress,
+      txHash: tx?.hash || null,
+    };
+
+    await updateTransaction(uuidV4(), updateTransaction_data);
+
+    if (transactionStatus === "failure") {
+      const customError = handleCustomError(err);
+      return res
+        .status(500)
+        .json({ message: customError.message });
+    }
+
+    return res.status(200).json({
       userName: user.username,
       userEmail: user.emailAddress,
       userPublicKey: user.publicKey,
-      amount: amount,
+      amount,
       txHash: tx.hash,
       message: "Transaction successful",
-    };
-
-    return res.status(200).json(response);
+    });
   } catch (err: any) {
     console.error("Transaction failed:", err);
-
     const customError = handleCustomError(err);
-
     return res.status(customError.statusCode).json({
       message: customError.message,
     });
   }
 };
+
 
 export const newTransactionByScan = async (
   req: Request,
@@ -79,9 +111,9 @@ export const newTransactionByScan = async (
 };
 
 export const initiateTransaction = async (req: Request, res: Response) => {
-  const { transactionID,amount,paymentMethod,currency } = req.body;
+  const { transactionID, merchantEmail, amount, paymentMethod, currency } = req.body;
   try {
-    const response = await createTransaction({amount,transactionID,paymentMethod,currency,status:"pending"});
+    const response = await createTransaction({ amount, merchantEmail, transactionID, paymentMethod, currency, status:"pending"});
 
     res.status(201).json({"message":"Transaction Initaed "});
   } catch (err) {
