@@ -3,6 +3,7 @@ import { Token } from "../models/Token";
 import { OTP } from "../models/Otp";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import Transaction from "../models/Transaction";
 
 dotenv.config();
 // Connect to the database
@@ -103,4 +104,67 @@ export const updateUserInDb = async (
     { $set: updates, updatedAt: new Date() },
     { new: true }
   );
+};
+interface TransactionInput {
+  transactionID: string;
+  paymentMethod: "card" | "wallet" | "upi" | "bank_transfer" | "cash";
+  amount: number;
+  currency: string;
+  status?: "pending" | "success" | "failed"; // optional, defaults to "pending"
+  createdAt?: Date; // optional
+}
+
+interface TransactionUpdateInput {
+  status?: "pending" | "success" | "failed";
+  paymentMethod?: "card" | "wallet" | "upi" | "bank_transfer" | "cash";
+  amount?: number;
+  currency?: string;
+  errorMessage?: string;
+  userId?: string;
+  merchantId?: string;
+  createdAt?: Date;
+  // add more fields here if needed
+}
+
+
+export const createTransaction = async (data: TransactionInput) => {
+  const {
+    transactionID,
+    paymentMethod,
+    amount,
+    currency,
+    status = "pending",
+    createdAt = new Date(),
+  } = data;
+
+  const newTx = new Transaction({
+    transactionID,
+    paymentMethod,
+    amount,
+    currency,
+    status,
+    createdAt,
+  });
+
+  await newTx.save();
+  return newTx;
+};
+
+export const getTransactionByID = async (transactionID: string) => {
+  return await Transaction.findOne({ transactionID });
+};
+
+export const updateTransaction = async (
+  transactionID: string,
+  updateFields: TransactionUpdateInput
+) => {
+  return await Transaction.findOneAndUpdate(
+    { transactionID },
+    { ...updateFields, updatedAt: new Date() },
+    { new: true }
+  );
+};
+
+export const deleteTransactionByID = async (transactionID: string) => {
+  return await Transaction.findOneAndDelete({ transactionID });
 };

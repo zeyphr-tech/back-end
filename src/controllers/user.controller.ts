@@ -41,7 +41,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 
   const { publicKey, privateKey } = generateKeyPair();
 
-  const { encryptedPrivateKey } = encryptPrivateKey(privateKey, password);
+  const  encryptedPrivateKey  = encryptPrivateKey(privateKey, password);
 
   const username = uniqueNamesGenerator({
     dictionaries: [adjectives, colors, animals],
@@ -104,7 +104,7 @@ export const updateUser = async (req: Request, res: Response):Promise<any> => {
     updates.passwordHash = newPasswordHash;
 
     if (user.pwdEncryptedPrivateKey) {
-      const { encryptedPrivateKey } = encryptPrivateKey(
+      const encryptedPrivateKey  = encryptPrivateKey(
         user.pwdEncryptedPrivateKey,
         dataToUpdate.password
       );
