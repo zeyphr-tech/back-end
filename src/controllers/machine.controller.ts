@@ -1,10 +1,11 @@
 import { v4 as uuidV4 } from "uuid";
 import { createTransaction, fetchUserByPubKey, updateTransaction } from "../config/db";
-import { decryptPrivateKey } from "../services/crypto.service";
+import { decryptPrivateKey, encryptPrivateKey } from "../services/crypto.service";
 import { Request, Response } from "express"; // Ensure you import these types
-import { newTransaction } from "./transaction.controller";
+import bcrypt from "bcryptjs"; 
 import { transferEther } from "../services/transfer.service";
 import { handleCustomError } from "../utils/error.util";
+import { updateUser } from "./user.controller";
 
 export const initiateTransactionByScanner = async (
   req: Request,
@@ -101,3 +102,43 @@ export const initiateTransactionByCard = async (
     res.status(500).json({ error: "Failed to create transaction" });
   }
 };
+
+
+export const enableTapandPay = async (
+  req: any,
+  res: Response 
+) => {
+  const { password } = req.body;
+  const {_id} = req.user;
+  try {
+    let user :any = await fetchUserByPubKey(_id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // check password using bcryptjs
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+    // update user
+    let decrypted = decryptPrivateKey(user.pwdEncryptedPrivateKey,password);
+    let encryptedPrivateKeyString = encryptPrivateKey(decrypted,"");
+
+    const dataToUpdate: any = {
+      cardEncryptedPrivateKey: encryptedPrivateKeyString,
+    };
+    req.body = dataToUpdate;
+
+    await updateUser(req, res);
+
+    res.status(200).json({
+      message: "Tap and Pay enabled", 
+    })
+    
+  }
+  catch(err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to enable tap and pay" });
+  } 
+} 

@@ -83,17 +83,39 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 };
 
 
+export const findExactUserByQuery = async (req: Request, res: Response): Promise<any> => {
+  
+  const { query } = req.query;
+
+  if (!query || typeof query!== "string") {
+    return res.status(400).json({ message: "Invalid search query." });
+  }
+
+  const users = await getUsersByQuery(query);
+
+  if (users.length > 1) {
+    return res.status(404).json({ message: "Two or more User found." });
+  }
+
+  const userData = users.map((user) => ({
+    _id: user._id,
+    username: user.username,
+    emailAddress: user.emailAddress,
+    publicKey: user.publicKey,
+  }));
+
+  res.status(200).json(userData[0]);
+}
+
+
 export const updateUser = async (req: any, res: Response):Promise<any> => {
   const { dataToUpdate } = req.body; // get userId from token 
-  const {_id} = req.user
-
+  const {_id} = req.user;
 
   const user = await fetchUser(_id);
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
-
-
 
   const updates: Record<string, any> = {};
 

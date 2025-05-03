@@ -46,8 +46,8 @@ export const saveUser = async ({
 };
 
 
-export const getUsersByQuery = async (query: string) => {
-  const regex = new RegExp(query, "i"); // case-insensitive
+export const getUsersByQuery = async (query: string, caseSensitive = false) => {
+  const regex = new RegExp(query, caseSensitive ? "" : "i"); // "i" for case-insensitive
 
   return await User.find({
     $or: [
@@ -57,6 +57,7 @@ export const getUsersByQuery = async (query: string) => {
     ],
   }).sort({ createdAt: -1 });
 };
+
 
 
 export const fetchUser = async (emailAddress: string) => {

@@ -99,21 +99,61 @@ export const getTransactionStatus = async (req: Request, res: Response):Promise<
   }
 };
 
-export const getAllTransactionByUser = async (req: any, res: Response):Promise<any> => {
-     const { publicKey } = req.user;
+export const getAllTransactionByUser = async (
+  req: any,
+  res: Response
+): Promise<any> => {
+  const { publicKey } = req.user;
 
   try {
     if (!publicKey || typeof publicKey !== "string") {
       return res.status(400).json({ message: "Invalid search query." });
     }
-    const tx = await getTransactionByPublicKey(publicKey);
-    if (!tx) return res.status(404).json({ error: "Transaction not found" }); 
-    res.json(tx);
-  } 
-  catch (err) {
-    res.status(500).json({ error: "Error fetching transaction" }); 
+
+    const txList = await getTransactionByPublicKey(publicKey);
+
+    if (!txList || txList.length === 0) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    const customData = await Promise.all(
+      txList.map(async (tx: any) => {
+        const fromUser = await fetchUserByPubKey(tx.from);
+        const toUser = await fetchUserByPubKey(tx.to);
+
+        return {
+          id: tx.id,
+          status: tx.status,
+          paymentMethod: tx.paymentMethod,
+          amount: tx.amount,
+          currency: tx.currency,
+          errorMessage: tx.errorMessage,
+          createdAt: tx.createdAt,
+          from: fromUser
+            ? {
+                username: fromUser.username,
+                emailAddress: fromUser.emailAddress,
+                publicKey: fromUser.publicKey,
+              }
+            : tx.from,
+          to: toUser
+            ? {
+                username: toUser.username,
+                emailAddress: toUser.emailAddress,
+                publicKey: toUser.publicKey,
+              }
+            : tx.to,
+        };
+      })
+    );
+
+    res.status(200).json(customData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching transaction" });
   }
-}
+};
+
 
 // Update the status and timestamp of a transaction
 
