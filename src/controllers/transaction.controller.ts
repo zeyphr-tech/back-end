@@ -145,6 +145,7 @@ export const getAllTransactionByUser = async (req: Request, res: Response):Promi
     }
     const tx = await getTransactionByPublicKey(publicKey);
     if (!tx) return res.status(404).json({ error: "Transaction not found" }); 
+    res.json(tx);
   } 
   catch (err) {
     res.status(500).json({ error: "Error fetching transaction" }); 
