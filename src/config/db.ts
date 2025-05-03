@@ -157,7 +157,7 @@ export const createTransaction = async (data: TransactionInput) => {
   const newTx = new Transaction({
     id,
     to,
-    transactionHash: id,  
+    txHash: id,
     paymentMethod,
     amount,
     currency,
@@ -169,8 +169,10 @@ export const createTransaction = async (data: TransactionInput) => {
   return newTx;
 };
 
-export const getTransactionByID = async (id: string) => {
-  return await Transaction.findOne({ id });
+export const getTransactionByIDOrPublicKey = async (value: string) => {
+  return await Transaction.find({
+    $or: [{ id: value }, { from: value }, { to: value }],
+  });
 };
 
 export const updateTransaction = async (

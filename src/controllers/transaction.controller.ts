@@ -6,7 +6,7 @@ import { machineScannerSchema, machineSchema } from "../schema/machine.schema";
 import {
   createTransaction,
   deleteTransactionByID,
-  getTransactionByID,
+  getTransactionByIDOrPublicKey,
   updateTransaction,
 } from "../config/db";
 
@@ -125,9 +125,10 @@ export const initiateTransaction = async (req: Request, res: Response) => {
 
 // Retrieve transaction status by transactionID
 export const getTransactionStatus = async (req: Request, res: Response):Promise<any> => {
-  const { id } = req.body;
+  const { id , publicKey} = req.body;
   try {
-    const tx = await getTransactionByID(id);
+    const value = id || publicKey;
+    const tx = await getTransactionByIDOrPublicKey(value);
     if (!tx) return res.status(404).json({ error: "Transaction not found" });
 
     res.json(tx);
