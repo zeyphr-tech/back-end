@@ -171,7 +171,10 @@ export const createTransaction = async (data: TransactionInput) => {
 
 export const getTransactionByPublicKey = async (publicKey: string) => {
   return await Transaction.find({
-    $or: [{ from: publicKey }, { to: publicKey }],
+    $or: [
+      { from: { $regex: `^${publicKey}$`, $options: 'i' } },
+      { to: { $regex: `^${publicKey}$`, $options: 'i' } }
+    ]
   });
 };
 
