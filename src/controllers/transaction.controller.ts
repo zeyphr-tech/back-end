@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { ethers } from "ethers";
 import { v4 as uuidV4 } from "uuid";
 import { transferEther } from "../services/transfer.service"; // adjust path if needed
-import { machineScannerSchema, machineSchema } from "../schema/machine.schema";
+import { machineSchema } from "../schema/machine.schema";
 import {
   createTransaction,
   deleteTransactionByID,
@@ -13,29 +12,28 @@ import {
 
 import { fetchUserByPubKey } from "../config/db";
 import { handleCustomError } from "../utils/error.util";
+import { decryptPrivateKey } from "../services/crypto.service";
 
 
 export const newTransaction = async (
-  req: Request,
+  req: any,
   res: Response
 ): Promise<any> => {
   try {
     const validatedData = machineSchema.parse(req.body);
+    const {publicKey , _id } =  req.user;
     if (!validatedData) {
       return res.status(400).json({ error: "Invalid data" });
     }
 
-    const { publicKey, privateKey, merchantPublicKey, amount } = validatedData;
-
-    // Sanity check for addresses
-    if (!ethers.isAddress(publicKey) || !ethers.isAddress(merchantPublicKey)) {
-      return res.status(400).json({ error: "Invalid User" });
-    }
+    const { to, amount, password , paymentMethod , currency } = validatedData;
 
     const user = await fetchUserByPubKey(publicKey);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    const decryptedPrivateKey = decryptPrivateKey(user.pwdEncryptedPrivateKey, password);
 
     let tx: any;
     let transactionStatus = "success";
@@ -43,7 +41,7 @@ export const newTransaction = async (
     let err;
 
     try {
-      tx = await transferEther(merchantPublicKey, amount, privateKey);
+      tx = await transferEther(to, amount, decryptedPrivateKey);
     } catch (error: any) {
       transactionStatus = "failure";
       err = error;
@@ -52,13 +50,12 @@ export const newTransaction = async (
 
     const updateTransaction_data: any = {
       status: transactionStatus,
-      paymentMethod: "card",
-      transactionHash: tx?.hash || null,
-      to: merchantPublicKey,
+      paymentMethod,
+      to,
       amount,
-      currency: "ETH",
+      currency,
       errorMessage,
-      from: user.publicKey,
+      from:publicKey, // user publickey  is taken from token
       txHash: tx?.hash || null,
     };
 
@@ -89,41 +86,6 @@ export const newTransaction = async (
 };
 
 
-export const newTransactionByScan = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  try {
-    const validatedData = machineScannerSchema.parse(req.body);
-    if (!validatedData) {
-      return res.status(400).json({ error: "Invalid data" });
-    }
-    const { transactionID } = validatedData;
-
-    
-  } catch (err: any) {
-    console.error("Transaction failed:", err);
-
-    const customError = handleCustomError(err);
-
-    return res.status(customError.statusCode).json({
-      error: customError.message,
-    });
-  }
-};
-
-export const initiateTransaction = async (req: Request, res: Response) => {
-  const { id, to, amount, paymentMethod, currency } = req.body;
-  try {
-    const response = await createTransaction({ amount, to, id, paymentMethod, currency, status:"pending"});
-
-    res.status(201).json({"message":"Transaction Initaed ",id:response._id});
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create transaction" });
-  }
-};
-
 // Retrieve transaction status by transactionID
 export const getTransactionStatus = async (req: Request, res: Response):Promise<any> => {
   const { id } = req.body;
@@ -137,8 +99,9 @@ export const getTransactionStatus = async (req: Request, res: Response):Promise<
   }
 };
 
-export const getAllTransactionByUser = async (req: Request, res: Response):Promise<any> => {
-  const { publicKey } = req.query;
+export const getAllTransactionByUser = async (req: any, res: Response):Promise<any> => {
+     const { publicKey } = req.user;
+
   try {
     if (!publicKey || typeof publicKey !== "string") {
       return res.status(400).json({ message: "Invalid search query." });

@@ -83,24 +83,17 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 };
 
 
-export const updateUser = async (req: Request, res: Response):Promise<any> => {
-  const { emailAddress, password, dataToUpdate } = req.body;
+export const updateUser = async (req: any, res: Response):Promise<any> => {
+  const { dataToUpdate } = req.body; // get userId from token 
+  const {_id} = req.user
 
-  if (!emailAddress || !password || !dataToUpdate) {
-    return res
-      .status(400)
-      .json({ error: "Email, password, and dataToUpdate are required" });
-  }
 
-  const user = await fetchUser(emailAddress);
+  const user = await fetchUser(_id);
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordValid) {
-    return res.status(401).json({ error: "Invalid password" });
-  }
+
 
   const updates: Record<string, any> = {};
 

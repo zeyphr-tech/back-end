@@ -64,7 +64,9 @@ export const fetchUser = async (emailAddress: string) => {
 };
 
 export const fetchUserByPubKey = async (publicKey: string) => {
-  return await User.findOne({ publicKey });
+  return await User.findOne({
+    publicKey: new RegExp(`^${publicKey}$`, "i"), // case-insensitive exact match
+  });
 };
 
 // Token operations

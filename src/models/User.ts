@@ -7,7 +7,7 @@ export interface IUser extends Document {
   passwordHash: string;
   publicKey: string;
   pwdEncryptedPrivateKey: string;
-  pinEncryptedPrivateKey: string;
+  cardEncryptedPrivateKey: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true },
     publicKey: { type: String, required: true },
     pwdEncryptedPrivateKey: { type: String, required: true },
-    pinEncryptedPrivateKey: { type: String, required: false },
+    cardEncryptedPrivateKey: { type: String, required: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

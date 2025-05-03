@@ -46,3 +46,19 @@ export function decryptPrivateKey(
   ]);
   return decrypted.toString("utf8");
 }
+
+
+// const handle = () => {
+ 
+//   let privateKey =
+//     "d6d394608d8f53d8ff6b395170a0bf5c28a9739bf26a4ff40521708b6bcc9c7e";
+//   let password = "";
+
+//   let encryptedString = encryptPrivateKey(privateKey, password);
+//   console.log("Encrypted String:", encryptedString);
+
+//   let decryptedString = decryptPrivateKey(encryptedString, password);
+//   console.log("Decrypted String:", decryptedString);
+// }
+
+// handle()
