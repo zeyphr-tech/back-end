@@ -1,39 +1,48 @@
 import crypto from "crypto";
+import dotenv from "dotenv";
+dotenv.config();
+
+const SECRET_KEY = process.env.SECRET_KEY || "your_32_byte_secret_key_goes_here_!!!";
+
+function deriveKey(password: string, salt: string): Buffer {
+  return crypto.scryptSync(password, salt, 32);
+}
 
 export function encryptPrivateKey(
   privateKey: string,
   password: string
-): { encryptedPrivateKey: string } {
-  const iv = crypto.randomBytes(16);
-  const salt = crypto.randomBytes(16);
+): string {
+  const key = deriveKey(password, SECRET_KEY);
+  const iv = crypto.randomBytes(12); 
 
-  // Derive a 32-byte encryption key from the password and salt
-  const key = crypto.scryptSync(password, salt, 32);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([
+    cipher.update(privateKey, "utf8"),
+    cipher.final(),
+  ]);
+  const authTag = cipher.getAuthTag();
 
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-
-  let encrypted = cipher.update(privateKey, "utf8", "hex");
-  encrypted += cipher.final("hex");
-
-  return {
-    encryptedPrivateKey: encrypted,
-  };
+  // Concatenate IV, ciphertext, and auth tag
+  return `${iv.toString("hex")}.${encrypted.toString("hex")}.${authTag.toString(
+    "hex"
+  )}`;
 }
 
 export function decryptPrivateKey(
-  encryptedData: string,
-  password: string,
-  ivHex: string,
-  saltHex: string
+  encryptedString: string,
+  password: string
 ): string {
+  const [ivHex, ciphertextHex, authTagHex] = encryptedString.split(".");
+  const key = deriveKey(password, SECRET_KEY);
   const iv = Buffer.from(ivHex, "hex");
-  const salt = Buffer.from(saltHex, "hex");
+  const authTag = Buffer.from(authTagHex, "hex");
+  const ciphertext = Buffer.from(ciphertextHex, "hex");
 
-  const key = crypto.scryptSync(password, salt, 32);
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-
-  let decrypted = decipher.update(encryptedData, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-
-  return decrypted;
+  const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(authTag);
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final(),
+  ]);
+  return decrypted.toString("utf8");
 }

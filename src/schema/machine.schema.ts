@@ -1,3 +1,4 @@
+import { Transaction } from "ethers";
 import {z} from "zod";  
 
 
@@ -7,3 +8,7 @@ export const machineSchema = z.object({
   merchantPublicKey: z.string(),
   amount: z.string(),
 })
+
+export const machineScannerSchema = z.object({
+  transactionID:z.string().uuid()
+});
