@@ -169,12 +169,15 @@ export const createTransaction = async (data: TransactionInput) => {
   return newTx;
 };
 
-export const getTransactionByIDOrPublicKey = async (value: string) => {
+export const getTransactionByPublicKey = async (publicKey: string) => {
   return await Transaction.find({
-    $or: [{ id: value }, { from: value }, { to: value }],
+    $or: [{ from: publicKey }, { to: publicKey }],
   });
 };
 
+export const getTransactionByID = async (id: string) => {
+  return await Transaction.findOne({ id });
+};
 export const updateTransaction = async (
   id: string,
   updateFields: TransactionUpdateInput

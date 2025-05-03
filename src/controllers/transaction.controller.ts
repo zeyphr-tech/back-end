@@ -6,7 +6,8 @@ import { machineScannerSchema, machineSchema } from "../schema/machine.schema";
 import {
   createTransaction,
   deleteTransactionByID,
-  getTransactionByIDOrPublicKey,
+  getTransactionByID,
+  getTransactionByPublicKey,
   updateTransaction,
 } from "../config/db";
 
@@ -125,10 +126,9 @@ export const initiateTransaction = async (req: Request, res: Response) => {
 
 // Retrieve transaction status by transactionID
 export const getTransactionStatus = async (req: Request, res: Response):Promise<any> => {
-  const { id , publicKey} = req.body;
+  const { id } = req.body;
   try {
-    const value = id || publicKey;
-    const tx = await getTransactionByIDOrPublicKey(value);
+    const tx = await getTransactionByID(id);
     if (!tx) return res.status(404).json({ error: "Transaction not found" });
 
     res.json(tx);
@@ -136,6 +136,20 @@ export const getTransactionStatus = async (req: Request, res: Response):Promise<
     res.status(500).json({ error: "Error fetching transaction" });
   }
 };
+
+export const getAllTransactionByUser = async (req: Request, res: Response):Promise<any> => {
+  const { publicKey } = req.query;
+  try {
+    if (!publicKey || typeof publicKey !== "string") {
+      return res.status(400).json({ message: "Invalid search query." });
+    }
+    const tx = await getTransactionByPublicKey(publicKey);
+    if (!tx) return res.status(404).json({ error: "Transaction not found" }); 
+  } 
+  catch (err) {
+    res.status(500).json({ error: "Error fetching transaction" }); 
+  }
+}
 
 // Update the status and timestamp of a transaction
 
