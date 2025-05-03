@@ -107,7 +107,7 @@ export const initiateTransactionByCard = async (
 export const enableTapandPay = async (
   req: any,
   res: Response 
-) => {
+):Promise<any> => {
   const { password } = req.body;
   const {_id} = req.user;
   try {
