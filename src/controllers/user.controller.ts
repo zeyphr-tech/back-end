@@ -23,7 +23,7 @@ export const checkUserExists = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { emailAddress } = req.params;
+  const { emailAddress } = req.body;
   const user = await fetchUser(emailAddress);
   res.json({ existing: !!user });
 };

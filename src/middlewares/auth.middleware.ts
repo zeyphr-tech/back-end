@@ -6,15 +6,12 @@ const whitelist = [
   "/api/otp/new",
   "/api/otp/validate",
   "/api/auth/login",
-  "/api/users/check-email:emailAddress",
-  "/api/users",
+  "/api/users/check-email",
+  "/api/users/new",
 ];
 
 const isWhitelisted = (path: string) => {
-  return whitelist.some((pattern) => {
-    const matcher = match(pattern, { decode: decodeURIComponent });
-    return matcher(path) !== false;
-  });
+  return whitelist.some(pattern => path.includes(pattern));
 };
 export const authMiddleware = (
   req: Request,
