@@ -36,7 +36,6 @@ export class TransactionFailedError extends BaseError {
 export const handleCustomError = (err: any): BaseError => {
   const message = err?.message || "";
 
-  // 🧾 ETHERS.JS specific errors
   if (
     message.includes("invalid address") ||
     message.includes("invalid checksum address")

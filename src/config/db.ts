@@ -124,19 +124,19 @@ export const updateUserInDb = async (
 
 interface TransactionInput {
   id: string;
-  paymentMethod: "card" | "wallet" | "upi" | "qr" | "cash";
+  paymentMethod: "card" | "wallet" |"qr";
   to?: string;
   from?: string;
   amount: number;
   currency: string;
-  status?: "pending" | "success" | "failed"; // optional, defaults to "pending"
+  status?: "pending" | "success" | "failure"; // optional, defaults to "pending"
   createdAt?: Date; // optional
 }
 
 interface TransactionUpdateInput {
   id: string;
-  status?: "pending" | "success" | "failed";
-  paymentMethod?: "card" | "wallet" | "upi" | "qr" | "cash";
+  status?: "pending" | "success" | "failure";
+  paymentMethod?: "card" | "wallet" | "qr"; 
   to?: string;
   from?: string;
   amount?: number;
