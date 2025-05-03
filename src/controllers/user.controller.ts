@@ -71,8 +71,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 
   let token = signToken({
     _id: newUser._id.toString(),
-    publicKey,
-    encryptedPrivateKey,
+    publicKey  
   });
   // Save the token in DB (tokens table)
   await saveToken(newUser._id.toString(), token);

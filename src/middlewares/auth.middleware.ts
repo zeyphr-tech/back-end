@@ -6,8 +6,8 @@ const whitelist = [
   "/api/otp/new",
   "/api/otp/validate",
   "/api/auth/login",
-  "/api/users/:emailAddress",
-  "/api/users"
+  "/api/users/check-email:emailAddress",
+  "/api/users",
 ];
 
 const isWhitelisted = (path: string) => {

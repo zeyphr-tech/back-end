@@ -29,7 +29,7 @@ export const loginUser = async (
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const payload = { _id: user._id, publicKey: user.publicKey, privateKey: user.pwdEncryptedPrivateKey };
+  const payload = { _id: user._id, publicKey: user.publicKey };
   const token = signToken(payload);
 
   // Save the token in DB (tokens table)
