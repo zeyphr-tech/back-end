@@ -53,7 +53,7 @@ export const newTransaction = async (
       err = error;
       errorMessage = error.message;
     }
-
+    let id  = uuidV4()
     const updateTransaction_data: any = {
       status: transactionStatus,
       paymentMethod,
@@ -62,10 +62,10 @@ export const newTransaction = async (
       currency,
       errorMessage,
       from:publicKey, // user publickey  is taken from token
-      txHash: tx?.hash || null,
+      txHash: tx?.hash || id,
     };
 
-    await updateTransaction(uuidV4(), updateTransaction_data);
+    await updateTransaction(id, updateTransaction_data);
 
     if (transactionStatus === "failure") {
       const customError = handleCustomError(err);
