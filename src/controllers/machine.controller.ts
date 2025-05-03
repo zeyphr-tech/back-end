@@ -19,6 +19,7 @@ export const initiateTransactionByScanner = async (
   try {
     const response = await createTransaction({
       to,
+      from: "",
       amount,
       paymentMethod: "qr",
       currency: "ETH",

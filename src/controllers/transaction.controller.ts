@@ -122,7 +122,7 @@ export const updateTransactionStatus = async (
   res: Response
 ): Promise<any> => {
   const { id, status } = req.body;
-
+  
   if (!id || !status) {
     return res
       .status(400)

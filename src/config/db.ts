@@ -125,6 +125,7 @@ interface TransactionInput {
   id: string;
   paymentMethod: "card" | "wallet" | "upi" | "qr" | "cash";
   to?: string;
+  from?: string;
   amount: number;
   currency: string;
   status?: "pending" | "success" | "failed"; // optional, defaults to "pending"
@@ -136,6 +137,7 @@ interface TransactionUpdateInput {
   status?: "pending" | "success" | "failed";
   paymentMethod?: "card" | "wallet" | "upi" | "qr" | "cash";
   to?: string;
+  from?: string;
   amount?: number;
   currency?: string;
   errorMessage?: string;
@@ -149,6 +151,7 @@ export const createTransaction = async (data: TransactionInput) => {
   const {
     id,
     to,
+    from,
     paymentMethod,
     amount,
     currency,
@@ -159,6 +162,7 @@ export const createTransaction = async (data: TransactionInput) => {
   const newTx = new Transaction({
     id,
     to,
+    from,
     txHash: id,
     paymentMethod,
     amount,
