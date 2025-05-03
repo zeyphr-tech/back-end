@@ -46,6 +46,15 @@ export const saveUser = async ({
 };
 
 
+export const getUserByQuery = async (query: any) => {
+ return await User.findOne({
+   $or: [
+     { username: query.toLowerCase() },
+     { emailAddress: query.toLowerCase() },
+     { publicKey: query },
+   ],
+ });};
+
 export const fetchUser = async (emailAddress: string) => {
   return await User.findOne({ emailAddress });
 };

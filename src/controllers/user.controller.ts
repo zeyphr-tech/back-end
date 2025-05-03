@@ -6,7 +6,7 @@ import {
   colors,
   animals,
 } from "unique-names-generator";
-import { fetchUser, saveToken, saveUser, updateUserInDb } from "../config/db";
+import { fetchUser, getUserByQuery, saveToken, saveUser, updateUserInDb } from "../config/db";
 import { encryptPrivateKey } from "../services/crypto.service";
 import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
@@ -129,4 +129,39 @@ export const updateUser = async (req: Request, res: Response):Promise<any> => {
   }
 
   return res.json({ success: true, updated: true });
+};
+
+
+/**
+ * Search user by email address or public key.
+ * Accepts { query: string } in the body.
+ */
+export const fetchUserByQuery = async (req: Request, res: Response):Promise<any> => {
+  try {
+    const { query } = req.body;
+
+    if (!query || typeof query !== "string") {
+      return res.status(400).json({ message: "Invalid search query." });
+    }
+
+     const user = await getUserByQuery(query);
+
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      emailAddress: user.emailAddress,
+      publicKey: user.publicKey,
+    }
+
+    return res.status(200).json(userData);
+
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Server error during user search." });
+  }
 };
