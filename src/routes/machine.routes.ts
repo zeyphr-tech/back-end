@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/scan/new',initiateTransactionByScanner)
 router.post("/card/new", initiateTransactionByCard);
-router.post("/card/enabletapandpay",enableTapandPay);
+router.post("/card/enable-tap-and-pay",enableTapandPay);
 
 
 export default router;
