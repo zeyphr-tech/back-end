@@ -119,7 +119,7 @@ export const getAllTransactionByUser = async (
     const txList = await getTransactionByPublicKey(publicKey);
 
     if (!txList || txList.length === 0) {
-      return res.status(404).json({ error: "Transaction not found" });
+      return res.status(200).json([]);
     }
 
     const customData = await Promise.all(
@@ -133,6 +133,7 @@ export const getAllTransactionByUser = async (
           paymentMethod: tx.paymentMethod,
           amount: tx.amount,
           currency: tx.currency,
+          txHash: tx.txHash,
           errorMessage: tx.errorMessage,
           createdAt: tx.createdAt,
           from: fromUser
