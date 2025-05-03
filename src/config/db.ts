@@ -114,6 +114,7 @@ export const updateUserInDb = async (
     { new: true }
   );
 };
+
 interface TransactionInput {
   id: string;
   paymentMethod: "card" | "wallet" | "upi" | "qr" | "cash";
