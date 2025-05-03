@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidV4 } from "uuid";
 import { transferEther } from "../services/transfer.service"; // adjust path if needed
 import { machineSchema } from "../schema/machine.schema";
+import bcrypt from "bcryptjs";
 import {
   createTransaction,
   deleteTransactionByID,
@@ -32,7 +33,12 @@ export const newTransaction = async (
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
+    
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    
     const decryptedPrivateKey = decryptPrivateKey(user.pwdEncryptedPrivateKey, password);
 
     let tx: any;

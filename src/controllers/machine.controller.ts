@@ -23,9 +23,9 @@ export const initiateTransactionByScanner = async (
       from: "",
       amount,
       paymentMethod: "qr",
-      currency: "ETH",
+      currency: "IOTA",
       status: "pending",
-      id
+      id,
     });
 
     res.status(201).json({
@@ -70,7 +70,7 @@ export const initiateTransactionByCard = async (
       paymentMethod:"card",
       to,
       amount,
-      currency:"ETH",
+      currency:"IOTA",
       errorMessage,
       from,
       txHash: tx?.hash || id,
