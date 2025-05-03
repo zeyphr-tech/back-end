@@ -163,6 +163,10 @@ export const fetchUserByQuery = async (req: Request, res: Response):Promise<any>
       emailAddress: user.emailAddress,
       publicKey: user.publicKey,
     }));
+    
+    if (req.headers.accept?.includes("text/html")) {
+      return res.send(`<pre>${JSON.stringify(userData, null, 2)}</pre>`);
+    }
 
     return res.status(200).json(userData);
 
