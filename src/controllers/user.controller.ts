@@ -6,7 +6,13 @@ import {
   colors,
   animals,
 } from "unique-names-generator";
-import { fetchUser, getUserByQuery, saveToken, saveUser, updateUserInDb } from "../config/db";
+import {
+  fetchUser,
+  getUsersByQuery,
+  saveToken,
+  saveUser,
+  updateUserInDb,
+} from "../config/db";
 import { encryptPrivateKey } from "../services/crypto.service";
 import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
@@ -138,25 +144,25 @@ export const updateUser = async (req: Request, res: Response):Promise<any> => {
  */
 export const fetchUserByQuery = async (req: Request, res: Response):Promise<any> => {
   try {
-    const { query } = req.body;
+    const { query } = req.query;
 
     if (!query || typeof query !== "string") {
       return res.status(400).json({ message: "Invalid search query." });
     }
 
-     const user = await getUserByQuery(query);
+     const users = await getUsersByQuery(query);
 
 
-    if (!user) {
+    if (users.length === 0) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const userData = {
+    const userData = users.map((user) => ({
       _id: user._id,
       username: user.username,
       emailAddress: user.emailAddress,
       publicKey: user.publicKey,
-    }
+    }));
 
     return res.status(200).json(userData);
 

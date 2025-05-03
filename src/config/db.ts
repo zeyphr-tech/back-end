@@ -46,14 +46,18 @@ export const saveUser = async ({
 };
 
 
-export const getUserByQuery = async (query: any) => {
- return await User.findOne({
-   $or: [
-     { username: query.toLowerCase() },
-     { emailAddress: query.toLowerCase() },
-     { publicKey: query },
-   ],
- });};
+export const getUsersByQuery = async (query: string) => {
+  const regex = new RegExp(query, "i"); // 'i' makes it case-insensitive
+
+  return await User.find({
+    $or: [
+      { username: { $regex: regex } },
+      { emailAddress: { $regex: regex } },
+      { publicKey: { $regex: regex } },
+    ],
+  });
+};
+
 
 export const fetchUser = async (emailAddress: string) => {
   return await User.findOne({ emailAddress });

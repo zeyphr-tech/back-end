@@ -8,9 +8,9 @@ import {
 
 const router = Router();
 
+router.get("/search", fetchUserByQuery);
 router.get("/:emailAddress", checkUserExists);
 router.post("/", registerUser);
 router.put("/", updateUser);
-router.post("/users/search", fetchUserByQuery);
 
 export default router;
