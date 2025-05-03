@@ -3,7 +3,6 @@ import {z} from "zod";
 
 
 export const machineSchema = z.object({
-  from: z.string(),
   to: z.string(),
   amount: z.string(),
   password: z.string(),
