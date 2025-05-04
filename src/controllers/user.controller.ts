@@ -63,6 +63,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
     passwordHash,
     publicKey,
     pwdEncryptedPrivateKey: encryptedPrivateKey,
+    billingAddress:"",
   });
 
   if (!newUser || !newUser._id) {
@@ -101,6 +102,8 @@ export const findExactUserByQuery = async (req: Request, res: Response): Promise
     username: user.username,
     emailAddress: user.emailAddress,
     publicKey: user.publicKey,
+    card: user.card,
+    billingAddress:user.billingAddress,
   }));
 
   res.status(200).json(userData[0]);

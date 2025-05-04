@@ -1,11 +1,12 @@
 import { v4 as uuidV4 } from "uuid";
-import { createTransaction, fetchUserByPubKey, updateTransaction } from "../config/db";
+import { createTransaction, fetchUserByPubKey, updateTransaction, updateUserById } from "../config/db";
 import { decryptPrivateKey, encryptPrivateKey } from "../services/crypto.service";
 import { Request, Response } from "express"; // Ensure you import these types
 import bcrypt from "bcryptjs"; 
 import { transferEther } from "../services/transfer.service";
 import { handleCustomError } from "../utils/error.util";
 import { updateUser } from "./user.controller";
+import { sendEmail, sendOtpEmail } from "../utils/email";
 
 export const initiateTransactionByScanner = async (
   req: Request,
@@ -106,39 +107,59 @@ export const initiateTransactionByCard = async (
 
 export const enableTapandPay = async (
   req: any,
-  res: Response 
-):Promise<any> => {
-  const { password } = req.body;
-  const {_id} = req.user;
+  res: Response
+): Promise<any> => {
+  const { password, billingAddress, enabled } = req.body;
+  const { _id, publicKey } = req.user;
+
   try {
-    let user :any = await fetchUserByPubKey(_id);
+    let user: any = await fetchUserByPubKey(publicKey);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    // check password using bcryptjs
+
+    // Password check only required for enabling
+    if (enabled) {
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-    // update user
-    let decrypted = decryptPrivateKey(user.pwdEncryptedPrivateKey,password);
-    let encryptedPrivateKeyString = encryptPrivateKey(decrypted,"");
+      // Decrypt and re-encrypt private key
+      const decrypted = decryptPrivateKey(
+        user.pwdEncryptedPrivateKey,
+        password
+      );
+      const encryptedPrivateKeyString = encryptPrivateKey(decrypted, "");
 
-    const dataToUpdate: any = {
-      cardEncryptedPrivateKey: encryptedPrivateKeyString,
-    };
-    req.body = dataToUpdate;
+      const dataToUpdate: any = {
+        cardEncryptedPrivateKey: encryptedPrivateKeyString,
+        card: "enabled",
+        billingAddress
+      };
 
-    await updateUser(req, res);
+      req.body = dataToUpdate;
 
-    res.status(200).json({
-      message: "Tap and Pay enabled", 
-    })
-    
-  }
-  catch(err) {
+      await updateUserById(user._id, dataToUpdate);
+      await sendEmail(user.emailAddress, billingAddress);
+
+      return res.status(200).json({ message: "Tap and Pay enabled" });
+    }
+    // Handle disabling
+    else {
+      const dataToUpdate: any = {
+        card: "disabled",
+        cardEncryptedPrivateKey: "",
+      };
+
+      req.body = dataToUpdate;
+
+      await updateUserById(user._id, dataToUpdate);
+
+      return res.status(200).json({ message: "Tap and Pay disabled" });
+    }
+  } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to enable tap and pay" });
-  } 
-} 
+    res.status(500).json({ error: "Failed to process Tap and Pay request" });
+  }
+};

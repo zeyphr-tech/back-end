@@ -35,3 +35,29 @@ export const sendOtpEmail = async (email: string, otp: string) => {
     throw new Error("Failed to send OTP email");
   }
 };
+
+export const sendEmail = async (email: string, billingAddress: string) => {
+  const htmlFilePath = path.join(__dirname, "enable_card_template.html");
+
+  // Read the HTML file content
+  const htmlContent = await fs.readFile(htmlFilePath, { encoding: "utf8" });
+
+  const htmlWithOtp = htmlContent.replace("${billingAddress}", billingAddress);
+
+  // Replace the placeholder with the actual OTP value
+
+  const mailOptions = {
+    from: "srirangankannan31@gmail.com",
+    to: email,
+    subject: `Thanks for Enabling Your NFC Card — Here's What’s Next`,
+    html: htmlWithOtp,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("OTP email sent: ", info.messageId);
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    throw new Error("Failed to send OTP email");
+  }
+};

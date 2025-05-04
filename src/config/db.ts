@@ -27,12 +27,14 @@ export const saveUser = async ({
   passwordHash,
   publicKey,
   pwdEncryptedPrivateKey,
+  billingAddress
 }: {
   username: string;
   emailAddress: string;
   passwordHash: string;
   publicKey: string;
   pwdEncryptedPrivateKey: string;
+  billingAddress:string
 }) => {
   const newUser = new User({
     username,
@@ -40,6 +42,7 @@ export const saveUser = async ({
     passwordHash,
     publicKey,
     pwdEncryptedPrivateKey,
+    billingAddress
   });
 
   return await newUser.save();
@@ -58,6 +61,13 @@ export const getUsersByQuery = async (query: string, caseSensitive = false) => {
   }).sort({ createdAt: -1 });
 };
 
+export const updateUserById = async (
+  userId: string,
+  data: any
+): Promise<any> => {
+  const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true });
+  return updatedUser;
+};
 
 
 export const fetchUser = async (emailAddress: string) => {

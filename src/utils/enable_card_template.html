@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFC Card Enabled</title>
+    <style>
+      body {
+        background-color: #f4f4f7;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #2e5aac;
+      }
+
+      .content p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 16px 0;
+      }
+
+      .address-box {
+        background-color: #f0f4ff;
+        padding: 16px;
+        border-left: 4px solid #2e5aac;
+        border-radius: 6px;
+        font-size: 15px;
+        margin-top: 12px;
+        white-space: pre-line;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 14px;
+        color: #888;
+      }
+
+      .footer a {
+        color: #2e5aac;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>NFC Card Activated 🎉</h1>
+      </div>
+      <div class="content">
+        <p>Hi there,</p>
+        <p>
+          Thank you for enabling the Zeyphr NFC card feature. Your card is now active and will be shipped to the billing address you provided within <strong>7 days</strong>.
+        </p>
+
+        <p><strong>Shipping To:</strong></p>
+        <div class="address-box">
+          ${billingAddress}
+        </div>
+
+        <p>If you have any questions or need assistance, feel free to contact us at any time.</p>
+        <p>Thanks for being a valued user of <strong>Zeyphr</strong>.</p>
+      </div>
+
+      <div class="footer">
+        Need help? <a href="mailto:support@zeyphr.com">support@zeyphr.com</a><br />
+        — The Zeyphr Team
+      </div>
+    </div>
+  </body>
+</html>
