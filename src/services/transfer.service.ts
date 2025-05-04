@@ -40,6 +40,12 @@ export const getContract = (privateKey: string) => {
   return contract;
 };
 
+export const getReadOnlyContract = () => {
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const contract = new ethers.Contract(contractAddress, contractABI, provider);
+  return contract;
+};
+
 
 export const bulkBuyItems = async (tokenIds: number[], privateKey:string) => {
   try {

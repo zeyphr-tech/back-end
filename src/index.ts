@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import machineRoutes from "./routes/machine.routes";
 import ipfsRoutes from "./routes/ipfs.routes";
+import productRoutes from "./routes/products.routes";
 import { authMiddleware } from "./middlewares/auth.middleware";
 import dotenv from "dotenv";
 import { connectDb } from "./config/db";
@@ -29,6 +30,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/transaction", transactionRoutes);
 app.use("/api/machine", machineRoutes);
 app.use("/api/ipfs",ipfsRoutes)
+app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async() => {

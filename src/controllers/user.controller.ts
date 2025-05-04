@@ -17,6 +17,9 @@ import { encryptPrivateKey } from "../services/crypto.service";
 import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
 import { userSchema } from "../schema/user.schema";
+import { getFaucetHost, requestIotaFromFaucetV0 } from "@iota/iota-sdk/faucet";
+
+
 
 // GET /api/users/:emailAddress
 export const checkUserExists = async (
@@ -69,6 +72,11 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
   if (!newUser || !newUser._id) {
     return res.status(500).json({ error: "Failed to register user" });
   }
+
+  // await requestIotaFromFaucetV0({
+  //   host: getFaucetHost('testnet'),
+  //   recipient: publicKey
+  // });
 
   let token = signToken({
     _id: newUser._id.toString(),
