@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { v4 as uuidV4 } from "uuid";
-import { transferEther } from "../services/transfer.service"; // adjust path if needed
+import { bulkBuyItems, transferEther } from "../services/transfer.service"; // adjust path if needed
 import { machineSchema } from "../schema/machine.schema";
 import bcrypt from "bcryptjs";
 import {
@@ -91,6 +91,80 @@ export const newTransaction = async (
   }
 };
 
+
+export const newBulkTransaction = async (req: any, res: Response): Promise<any> => {
+  try {
+    // const validatedData = machineSchema.parse(req.body);
+    // const { publicKey, _id } = req.user;
+    // if (!validatedData) {
+    //   return res.status(400).json({ error: "Invalid data" });
+    // }
+
+    const {tokenIds, password,amount, paymentMethod, currency } = req.body;
+    const { publicKey } = req.user;
+
+    const user = await fetchUserByPubKey(publicKey);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const decryptedPrivateKey = decryptPrivateKey(
+      user.pwdEncryptedPrivateKey,
+      password
+    );
+
+    let tx: any;
+    let transactionStatus = "success";
+    let errorMessage = "";
+    let err;
+
+    try {
+      tx = await bulkBuyItems(tokenIds, decryptedPrivateKey);
+    } catch (error: any) {
+      transactionStatus = "failure";
+      err = error;
+      errorMessage = error.message;
+    }
+    let id = uuidV4();
+    const updateTransaction_data: any = {
+      status: transactionStatus,
+      paymentMethod,
+      to:tx.to,
+      amount:amount,
+      currency,
+      errorMessage,
+      from: publicKey, // user publickey  is taken from token
+      txHash: tx?.hash || id,
+    };
+
+    await updateTransaction(id, updateTransaction_data);
+
+    if (transactionStatus === "failure") {
+      const customError = handleCustomError(err);
+      return res.status(500).json({ message: customError.message });
+    }
+
+    return res.status(200).json({
+      userName: user.username,
+      userEmail: user.emailAddress,
+      userPublicKey: user.publicKey,
+      amount,
+      txHash: tx.hash,
+      message: "Transaction successful",
+    });
+  } catch (err: any) {
+    console.error("Transaction failed:", err);
+    const customError = handleCustomError(err);
+    return res.status(customError.statusCode).json({
+      message: customError.message,
+    });
+  }
+};
 
 // Retrieve transaction status by transactionID
 export const getTransactionStatus = async (req: Request, res: Response):Promise<any> => {
