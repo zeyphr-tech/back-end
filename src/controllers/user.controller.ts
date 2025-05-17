@@ -17,8 +17,9 @@ import { encryptPrivateKey } from "../services/crypto.service";
 import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
 import { userSchema } from "../schema/user.schema";
-import { getFaucetHost, requestIotaFromFaucetV0 } from "@iota/iota-sdk/faucet";
-
+import { transferEther } from "../services/transfer.service";
+import dotenv from "dotenv";
+dotenv.config();
 
 
 // GET /api/users/:emailAddress
@@ -73,10 +74,17 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
     return res.status(500).json({ error: "Failed to register user" });
   }
 
-  // await requestIotaFromFaucetV0({
-  //   host: getFaucetHost('testnet'),
-  //   recipient: publicKey
-  // });
+  // add 100 IOTA to the user's account
+  try {
+    const DUMMY_ACCOUNT_PRIVATE_KEY = process.env.DUMMY_ACCOUNT_PRIVATE_KEY;
+
+    if (!DUMMY_ACCOUNT_PRIVATE_KEY) {
+      throw new Error("Dummy account private key not found"); 
+    }
+    const tx = await transferEther(publicKey, "100", DUMMY_ACCOUNT_PRIVATE_KEY);
+  } catch (error) {
+    console.error("Failed to add 100 IOTA to the user's account:", error);    
+  }
 
   let token = signToken({
     _id: newUser._id.toString(),
