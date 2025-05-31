@@ -25,10 +25,10 @@ type transactionStatus =
   | "success"
   | "failure"
 
-export const newTransaction = async (req: Request, res: Response) :Promise<any> => {
+export const newTransaction = async (req: any, res: Response) :Promise<any> => {
   try {
     const validatedData = transactionSchema.parse(req.body);
-    const { publicKey } = req.user!;
+    const { publicKey } = req.user;
 
     const user = await fetchUserByPubKey(publicKey);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -97,7 +97,7 @@ export const newTransaction = async (req: Request, res: Response) :Promise<any> 
 };
 
 export const newBulkTransaction = async (
-  req: Request,
+  req: any,
   res: Response
 ): Promise<any> => {
   try {
@@ -184,7 +184,7 @@ export const getTransactionStatus = async (
 };
 
 export const getAllTransactionByUser = async (
-  req: Request,
+  req: any,
   res: Response
 ): Promise<any> => {
   try {
