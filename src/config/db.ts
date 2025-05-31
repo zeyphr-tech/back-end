@@ -154,6 +154,7 @@ interface TransactionUpdateInput {
   errorMessage?: string;
   userEmail?: string;
   createdAt?: Date;
+  txHash?: string;
   // add more fields here if needed
 }
 

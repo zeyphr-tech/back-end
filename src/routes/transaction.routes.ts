@@ -5,7 +5,7 @@ import {
   getTransactionStatus,
   newBulkTransaction,
   newTransaction,
-  updateTransactionStatus
+  updateTransactionStatus,
 } from "../controllers/transaction.controller";
 
 const router = Router();
