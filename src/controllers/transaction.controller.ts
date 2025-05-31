@@ -51,7 +51,7 @@ export const newTransaction = async (req: any, res: Response): Promise<any> => {
       err = error;
       errorMessage = error.message;
     }
-    let id = uuidV4();
+    let id = validatedData.txId || uuidV4();
     const updateTransaction_data: any = {
       status: transactionStatus,
       paymentMethod,
