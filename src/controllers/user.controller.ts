@@ -18,6 +18,7 @@ import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
 import { userSchema } from "../schema/user.schema";
 import { transferEther } from "../services/transfer.service";
+import { createAccount } from "../hedera/index";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -49,7 +50,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
   if (existingUser)
     return res.status(409).json({ error: "User already exists" });
 
-  const { publicKey, privateKey } = generateKeyPair();
+  const { publicKey, privateKey, initialBalance } = await createAccount(); 
 
   const  encryptedPrivateKey  = encryptPrivateKey(privateKey, password);
 
@@ -74,17 +75,17 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
     return res.status(500).json({ error: "Failed to register user" });
   }
 
-  // add 100 IOTA to the user's account
-  try {
-    const DUMMY_ACCOUNT_PRIVATE_KEY = process.env.DUMMY_ACCOUNT_PRIVATE_KEY;
+  // // add 100 IOTA to the user's account
+  // try {
+  //   const DUMMY_ACCOUNT_PRIVATE_KEY = process.env.DUMMY_ACCOUNT_PRIVATE_KEY;
 
-    if (!DUMMY_ACCOUNT_PRIVATE_KEY) {
-      throw new Error("Dummy account private key not found"); 
-    }
-    const tx = await transferEther(publicKey, "100", DUMMY_ACCOUNT_PRIVATE_KEY);
-  } catch (error) {
-    console.error("Failed to add 100 IOTA to the user's account:", error);    
-  }
+  //   if (!DUMMY_ACCOUNT_PRIVATE_KEY) {
+  //     throw new Error("Dummy account private key not found"); 
+  //   }
+  //   const tx = await transferEther(publicKey, "100", DUMMY_ACCOUNT_PRIVATE_KEY);
+  // } catch (error) {
+  //   console.error("Failed to add 100 IOTA to the user's account:", error);    
+  // }
 
   let token = signToken({
     _id: newUser._id.toString(),
