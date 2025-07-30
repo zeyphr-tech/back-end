@@ -3,6 +3,7 @@ import {
   Hbar,
   AccountCreateTransaction,
   PrivateKey,
+  AccountBalanceQuery,
 } from "@hashgraph/sdk";
 
 import * as dotenv from "dotenv";
@@ -31,9 +32,20 @@ export const createAccount = async () => {
 
   const receipt = await response.getReceipt(hederaClient);
 
+  const newAccountId = receipt.accountId as unknown as string;
+
   return {
-    publicKey: accountPublicKey.toString(),
+    publicKey: newAccountId.toString(),
     privateKey: accountPrivateKey.toString(),
     initialBalance,
   };
 };
+
+
+export const getBalance = async (accountId: string) => {
+  const balance = await new AccountBalanceQuery()
+      .setAccountId(accountId)
+      .execute(hederaClient);
+  return balance.hbars.toString();
+}
+

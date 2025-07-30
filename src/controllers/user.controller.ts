@@ -18,7 +18,7 @@ import { generateKeyPair } from "../services/user.service";
 import { signToken } from "../services/token.service";
 import { userSchema } from "../schema/user.schema";
 import { transferEther } from "../services/transfer.service";
-import { createAccount } from "../hedera/index";
+import { createAccount, getBalance } from "../hedera/index";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -208,4 +208,10 @@ export const fetchUserByQuery = async (req: Request, res: Response):Promise<any>
     console.error("Search error:", error);
     res.status(500).json({ message: "Server error during user search." });
   }
+};
+
+export const getUserBalance = async (req: any, res: Response):Promise<any> => {
+  const { publicKey } = req.user;
+  const balance = await getBalance(publicKey);
+  return res.status(200).json({ balance });
 };

@@ -5,6 +5,7 @@ import {
   findExactUserByQuery,
   registerUser,
   updateUser,
+  getUserBalance,
 } from "../controllers/user.controller";
 
 const router = Router();
@@ -14,5 +15,6 @@ router.post("/check-email", checkUserExists);
 router.get("/fetch-user", findExactUserByQuery);
 router.post("/new", registerUser);
 router.put("/", updateUser);
+router.get("/get-balance", getUserBalance);
 
 export default router;
