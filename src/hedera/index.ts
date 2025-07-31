@@ -4,6 +4,8 @@ import {
   AccountCreateTransaction,
   PrivateKey,
   AccountBalanceQuery,
+  TransferTransaction,
+  AccountId,
 } from "@hashgraph/sdk";
 
 import * as dotenv from "dotenv";
@@ -48,4 +50,20 @@ export const getBalance = async (accountId: string) => {
       .execute(hederaClient);
   return balance.hbars.toString();
 }
+
+export const transferHBAR = async (from: string, to: string, amount: number, privateKey: string) => {
+  const tx = await new TransferTransaction()
+    .addHbarTransfer(AccountId.fromString(from), new Hbar(-amount))
+    .addHbarTransfer(AccountId.fromString(to), new Hbar(amount))
+    .freezeWith(hederaClient)
+    .sign(PrivateKey.fromStringECDSA(privateKey));
+
+  const executedTx = await tx.execute(hederaClient);
+  const receipt = await executedTx.getReceipt(hederaClient);
+
+  return {
+    isTxSuccess: receipt.status.toString() === "SUCCESS",
+    txId: executedTx.transactionId.toString(),
+  };
+};
 

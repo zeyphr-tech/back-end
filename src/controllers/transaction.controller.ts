@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { v4 as uuidV4 } from "uuid";
-import { bulkBuyItems, transferEther } from "../services/transfer.service"; // adjust path if needed
+import { bulkBuyItems } from "../services/transfer.service"; // adjust path if needed
 import { machineSchema } from "../schema/machine.schema";
 import bcrypt from "bcryptjs";
 import {
@@ -13,6 +13,7 @@ import {
 import { fetchUserByPubKey } from "../config/db";
 import { handleCustomError } from "../utils/error.util";
 import { decryptPrivateKey } from "../services/crypto.service";
+import { transferHBAR } from "../hedera";
 
 export const newTransaction = async (req: any, res: Response): Promise<any> => {
   try {
@@ -39,13 +40,16 @@ export const newTransaction = async (req: any, res: Response): Promise<any> => {
       password
     );
 
-    let tx: any;
+    let tx;
     let transactionStatus = "success";
     let errorMessage = "";
     let err;
 
     try {
-      tx = await transferEther(to, amount, decryptedPrivateKey);
+      tx = await transferHBAR(publicKey, to, Number(amount), decryptedPrivateKey);
+      if (!tx.isTxSuccess) {
+        throw new Error("Transaction failed");
+      }
     } catch (error: any) {
       transactionStatus = "failure";
       err = error;
@@ -60,7 +64,7 @@ export const newTransaction = async (req: any, res: Response): Promise<any> => {
       currency,
       errorMessage,
       from: publicKey, // user publickey  is taken from token
-      txHash: tx?.hash || id,
+      txHash: tx?.txId || id,
     };
 
     await updateTransaction(id, updateTransaction_data);
@@ -75,7 +79,7 @@ export const newTransaction = async (req: any, res: Response): Promise<any> => {
       userEmail: user.emailAddress,
       userPublicKey: user.publicKey,
       amount,
-      txHash: tx.hash,
+      txHash: tx?.txId,
       message: "Transaction successful",
     });
   } catch (err: any) {
