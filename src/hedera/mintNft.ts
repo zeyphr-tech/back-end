@@ -1,7 +1,7 @@
 import {
     TokenMintTransaction,
     TokenId,
-  } from "@hashgraph/sdk";
+} from "@hashgraph/sdk";
 import { client, operatorId, operatorKey } from "./client";
 import { connectToDb } from "./db";
 
@@ -44,7 +44,7 @@ export async function mintToCollection(
     owner: operatorId.toString(),
     listed: true,
     price: initialPrice,
-    seller: operatorId.toString(),
+    seller: minterAccountId,
     mintedAt: new Date(),
     listedAt: new Date(),
   });

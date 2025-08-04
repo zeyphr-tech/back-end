@@ -1,0 +1,99 @@
+import {
+    TransferTransaction,
+    Hbar,
+    TokenId,
+    AccountId,
+    PrivateKey,
+    Status,
+} from "@hashgraph/sdk";
+  
+import { client, operatorId, operatorKey } from "./client";
+import { connectToDb } from "./db";
+import { associateToken } from "./associateToken";
+
+export async function buyNFT(
+  tokenIdStr: string,
+  serialNumber: number,
+  buyerIdStr: string,
+  buyerKeyStr: string
+): Promise<{
+  tokenId: string;
+  serialNumber: number;
+  newOwner: string;
+  price: number;
+}> {
+  const tokenId = TokenId.fromString(tokenIdStr);
+  const buyerId = AccountId.fromString(buyerIdStr);
+  const buyerKey = PrivateKey.fromString(buyerKeyStr);
+  
+  const db = await connectToDb();
+  const nfts = db.collection("nfts");
+  
+    const nft = await nfts.findOne({ tokenId: tokenIdStr, serialNumber });
+  
+  if (!nft || !nft.listed || !nft.price || !nft.seller) {
+    throw new Error("NFT is not listed for sale.");
+  }
+  
+  if (nft.seller === buyerIdStr) {
+    throw new Error("Seller cannot buy their own NFT.");
+  }
+  
+  const price = nft.price;
+  const sellerId = AccountId.fromString(nft.seller);
+  
+  try {
+    await associateToken(buyerIdStr, buyerKeyStr, tokenIdStr, client);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes("TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT")) {
+      console.log("Buyer already associated with token.");
+    } else {
+      throw err;
+    }
+  }
+  
+  const hbarTx = await new TransferTransaction()
+    .addHbarTransfer(buyerId, new Hbar(-price))
+    .addHbarTransfer(sellerId, new Hbar(price))
+    .freezeWith(client)
+    .sign(buyerKey);
+  
+  const hbarTxRes = await hbarTx.execute(client);
+  const hbarReceipt = await hbarTxRes.getReceipt(client);
+  
+  if (hbarReceipt.status !== Status.Success) {
+    throw new Error(`HBAR transfer failed: ${hbarReceipt.status}`);
+  }
+  
+  const nftTx = await new TransferTransaction()
+    .addNftTransfer(tokenId, serialNumber, operatorId, buyerId)
+    .freezeWith(client)
+    .sign(operatorKey);
+  
+    const nftTxRes = await nftTx.execute(client);
+    const nftReceipt = await nftTxRes.getReceipt(client);
+  
+  if (nftReceipt.status !== Status.Success) {
+    throw new Error(`NFT transfer failed: ${nftReceipt.status}`);
+  }
+  
+  await nfts.updateOne(
+    { tokenId: tokenIdStr, serialNumber },
+    {
+      $set: {
+        owner: buyerIdStr,
+        listed: false,
+        price: null,
+        seller: null,
+        listedAt: null,
+      },
+    }
+  );
+  
+  return {
+    tokenId: tokenIdStr,
+    serialNumber,
+    newOwner: buyerIdStr,
+    price,
+  };
+}  
