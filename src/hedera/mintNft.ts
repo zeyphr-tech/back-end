@@ -3,7 +3,7 @@ import {
     TokenId,
 } from "@hashgraph/sdk";
 import { client, operatorId, operatorKey } from "./client";
-import { connectToDb } from "./db";
+import { saveNft } from "../config/db";
 
 interface MintResult {
   tokenId: string;
@@ -32,11 +32,9 @@ export async function mintToCollection(
   }
   
   const serial = mintReceipt.serials[0].toNumber();
+
   
-  const db = await connectToDb();
-  const nftsCollection = db.collection("nfts");
-  
-  await nftsCollection.insertOne({
+  await saveNft({
     tokenId: tokenIdStr,
     serialNumber: serial,
     metadata: metadataBuffer.toString(), 

@@ -5,8 +5,8 @@ import {
 } from "@hashgraph/sdk";
   
 import { client, operatorId, operatorKey } from "./client";
-import { connectToDb } from "./db";
 import { associateToken } from "./associateToken";
+import { getNftByTokenAndSerial, updateNft } from "../config/db";
   
 export async function unlistNFT(
   tokenIdStr: string,
@@ -22,11 +22,9 @@ export async function unlistNFT(
   const tokenId = TokenId.fromString(tokenIdStr);
   const recipientId = AccountId.fromString(recipientIdStr);
   
-  const db = await connectToDb();
-  const nfts = db.collection("nfts");
+
   
-  const query = { tokenId: tokenIdStr, serialNumber };
-  const nft = await nfts.findOne(query);
+  const nft = await getNftByTokenAndSerial(tokenIdStr, serialNumber);
   
   if (!nft) {
     throw new Error("NFT not found in database.");
@@ -72,9 +70,9 @@ export async function unlistNFT(
     },
   };
   
-  const result = await nfts.updateOne(query, update);
+  const result = await updateNft(tokenIdStr, serialNumber, update);
   
-  if (result.matchedCount === 0) {
+  if (result && result.matchedCount === 0) {
     throw new Error("Failed to update NFT.");
   }
   

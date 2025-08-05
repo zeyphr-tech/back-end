@@ -6,10 +6,9 @@ import {
     PrivateKey,
     Status,
 } from "@hashgraph/sdk";
-  
 import { client, operatorId, operatorKey } from "./client";
-import { connectToDb } from "./db";
 import { associateToken } from "./associateToken";
+import { getNftByTokenAndSerial, updateNft } from "../config/db";
 
 export async function buyNFT(
   tokenIdStr: string,
@@ -26,10 +25,8 @@ export async function buyNFT(
   const buyerId = AccountId.fromString(buyerIdStr);
   const buyerKey = PrivateKey.fromString(buyerKeyStr);
   
-  const db = await connectToDb();
-  const nfts = db.collection("nfts");
   
-    const nft = await nfts.findOne({ tokenId: tokenIdStr, serialNumber });
+    const nft = await getNftByTokenAndSerial(tokenIdStr, serialNumber);
   
   if (!nft || !nft.listed || !nft.price || !nft.seller) {
     throw new Error("NFT is not listed for sale.");
@@ -77,8 +74,7 @@ export async function buyNFT(
     throw new Error(`NFT transfer failed: ${nftReceipt.status}`);
   }
   
-  await nfts.updateOne(
-    { tokenId: tokenIdStr, serialNumber },
+  await updateNft(tokenIdStr, serialNumber,
     {
       $set: {
         owner: buyerIdStr,

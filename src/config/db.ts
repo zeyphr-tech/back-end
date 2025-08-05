@@ -4,6 +4,7 @@ import { OTP } from "../models/Otp";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Transaction from "../models/Transaction";
+import { Nft } from "../models/Nft";
 
 dotenv.config();
 // Connect to the database
@@ -212,4 +213,54 @@ export const updateTransaction = async (
 
 export const deleteTransactionByID = async (id: string) => {
   return await Transaction.findOneAndDelete({ id });
+};
+
+
+
+
+export const getNftByTokenAndSerial = async (
+  tokenId: string,
+  serialNumber: number
+) => {
+  return await Nft.findOne({ tokenId, serialNumber });
+};
+
+/**
+ * Create or save a new NFT
+ */
+export const saveNft = async (nftData: any) => {
+  const newNft = new Nft(nftData);
+  return await newNft.save();
+};
+
+/**
+ * Get all NFTs owned by a specific address
+ */
+export const getNftsByOwner = async (owner: string) => {
+  return await Nft.find({ owner: new RegExp(`^${owner}$`, "i") });
+};
+
+/**
+ * Update an NFT's metadata or owner
+ */
+export const updateNft = async (
+  tokenId: string,
+  serialNumber: number,
+  updates: Record<string, any>
+) => {
+  return await Nft.findOneAndUpdate(
+    { tokenId, serialNumber },
+    { $set: updates, updatedAt: new Date() },
+    { new: true }
+  );
+};
+
+export const fetchProducts = async () => {
+  return await Nft.find({ listed: true });
+}
+/**
+ * Delete an NFT (use with caution)
+ */
+export const deleteNft = async (tokenId: string, serialNumber: number) => {
+  return await Nft.findOneAndDelete({ tokenId, serialNumber });
 };

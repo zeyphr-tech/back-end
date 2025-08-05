@@ -8,8 +8,9 @@ import bcrypt from "bcryptjs";
 import { ethers } from "ethers";
 
 import { getContract, getReadOnlyContract } from "../services/transfer.service";
-import { fetchUserByPubKey } from "../config/db";
+import { fetchProducts, fetchUserByPubKey } from "../config/db";
 import { decryptPrivateKey } from "../services/crypto.service";
+import { mintToCollection } from "../hedera/mintNft";
 
 dotenv.config();
 
@@ -94,17 +95,16 @@ router.post(
       );
 
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${metaDataResponse.data.IpfsHash}`;
-      const contract = getContract(decryptedPrivateKey);
 
       // Mint NFT
-      const tx = await contract.mintItem(
-        tokenURI,
-        ethers.parseEther(amount),
-        parseInt(quantity),
-        transferable === "true" || transferable === true
+      const tx = await mintToCollection(
+        publicKey,
+        metaDataResponse.data,
+        publicKey,
+        amount
       );
 
-      const receipt = await tx.wait();
+      const receipt = tx
 
       res.status(200).json({ success: true, data: receipt });
     } catch (err) {
@@ -113,6 +113,16 @@ router.post(
     }
   }
 );
+
+router.get("/fetch-items", async (req: any, res):Promise<any> => {
+  try {
+    const data = await fetchProducts();
+    return res.status(200).json({ items: data });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+})
 router.get("/fetch-items-by-owner", async (req: any, res):Promise<any> => {
   try {
     const { publicKey } = req.user;
@@ -163,7 +173,7 @@ router.get("/fetch-items-by-owner", async (req: any, res):Promise<any> => {
         console.error(`Error processing token ${i}:`, err);
       }
     }
-
+    
     return res.status(200).json({ items: ownedItems });
   } catch (err) {
     console.error("Failed to fetch items by owner:", err);
