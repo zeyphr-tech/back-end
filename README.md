@@ -1,21 +1,12 @@
 # Zeyphr – Bringing Web3 to Everyone
 ![Zeyphr Logo](https://res.cloudinary.com/dezo0vvpb/image/upload/v1746361459/WhatsApp_Image_2025-04-09_at_5.09.11_PM_hyxsn5.jpg)
 
-Zeyphr is a decentralized Web3 marketplace and crypto-native payment platform built using the IOTA EVM. It enables users and businesses to transact seamlessly, both online and offline, with familiar Web2-like user experiences—email logins, one-tap payments, QR scan, and more—while abstracting away the blockchain complexities underneath.
+## 🧠 About Zeyphr
+
+Zeyphr is our startup which we are building throughout IOTA Movethon and Hedera Hello Future Trilogy under the **DeFi / Tokenization** track. Our Mission is Web3 ecommerce gateway that removes the complexity of blockchain. From email-password logins to universal tap-and-pay, QR pay Zeyphr enables anyone to buy, sell, and transact — online or offline and also allows Business to create stable coins for their businesses - Just like Web2 !!
 
 ---
 
-## 📣 A Kind Note for Judges
-
-After our May 4th submission, the [IOTA EVM Faucet](https://github.com/iotaledger/evm-toolkit) we used was deprecated. Since our “Bank Deposit” feature wasn’t ready before the deadline, we relied on the faucet to fund wallets.
-
-To ensure a smooth demo, we allocated 4500 IOTA to a central wallet. New users now receive 100 IOTA on signup to try key features like scan & pay, transfers, and purchases.
-
-You can watch our [demo video](https://youtu.be/2_dmkKHpmGk?si=LUITiZmzf1zUCH3Y) and compare it with the current app — you won’t notice any critical new features.
-
-If you have any questions, please feel free to email us at [2020ad0149@svce.ac.in](mailto:2020ad0149@svce.ac.in). We’re happy to help and usually respond within 14 hours.
-
----
 
 ## 🔗 Links
 

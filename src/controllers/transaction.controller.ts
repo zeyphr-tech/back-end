@@ -135,14 +135,20 @@ export const newBulkTransaction = async (req: any, res: Response): Promise<any> 
         id: uuidV4(),
         status,
         paymentMethod,
-        to: tx?.to || null,
+        to: "",
         amount,
         currency,
         errorMessage,
-        from: tx.from  || null,
+        from:"",
         txHash,
         tokenId: serial,
       };
+
+      if(status === "success") {
+        transactionRecord.from = tx.from || null;
+        transactionRecord.to = tx?.to || null ;
+      }
+
 
       await updateTransaction(uuidV4(), transactionRecord);
 

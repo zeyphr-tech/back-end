@@ -5,9 +5,7 @@ import fs from "fs";
 import axios from "axios";
 import FormData from "form-data";
 import bcrypt from "bcryptjs";
-import { ethers } from "ethers";
 
-import { getContract, getReadOnlyContract } from "../services/transfer.service";
 import { fetchProductByOwnedBySeller, fetchProducts, fetchUserByPubKey } from "../config/db";
 import { decryptPrivateKey } from "../services/crypto.service";
 import { mintToCollection } from "../hedera/mintNft";

@@ -6,7 +6,7 @@ const transactionSchema = new mongoose.Schema({
   from: { type: String, required: false },
   to: { type: String, requried:true },
   amount: { type: Number, required: true },
-  currency: { type: String, default: "IOTA" },
+  currency: { type: String, default: "HBAR" },
   paymentMethod: {
     type: String,
     enum: ["card", "wallet","qr"],

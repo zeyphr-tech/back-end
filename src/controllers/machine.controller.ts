@@ -3,10 +3,9 @@ import { createTransaction, fetchUserByPubKey, updateTransaction, updateUserById
 import { decryptPrivateKey, encryptPrivateKey } from "../services/crypto.service";
 import { Request, Response } from "express"; // Ensure you import these types
 import bcrypt from "bcryptjs"; 
-import { transferEther } from "../services/transfer.service";
 import { handleCustomError } from "../utils/error.util";
-import { updateUser } from "./user.controller";
 import { sendEmail, sendOtpEmail } from "../utils/email";
+import { transferHBAR } from "../hedera";
 
 export const initiateTransactionByScanner = async (
   req: Request,
@@ -24,7 +23,7 @@ export const initiateTransactionByScanner = async (
       from: "",
       amount,
       paymentMethod: "qr",
-      currency: "IOTA",
+      currency: "HBAR",
       status: "pending",
       id,
     });
@@ -59,7 +58,7 @@ export const initiateTransactionByCard = async (
     let err;
 
     try {
-      tx = await transferEther(to, amount, decryptedPrivateKey);
+      tx = await transferHBAR(from, to, amount, decryptedPrivateKey);
     } catch (error: any) {
       transactionStatus = "failure";
       err = error;
@@ -71,7 +70,7 @@ export const initiateTransactionByCard = async (
       paymentMethod:"card",
       to,
       amount,
-      currency:"IOTA",
+      currency:"HBAR",
       errorMessage,
       from,
       txHash: tx?.hash || id,
