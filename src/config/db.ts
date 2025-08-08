@@ -146,7 +146,7 @@ interface TransactionInput {
 
 interface TransactionUpdateInput {
   id: string;
-  status?: "pending" | "success" | "failure";
+  status?: string;
   paymentMethod?: "card" | "wallet" | "qr"; 
   to?: string;
   from?: string;
@@ -257,6 +257,10 @@ export const updateNft = async (
 
 export const fetchProducts = async () => {
   return await Nft.find({ listed: true });
+}
+
+export const fetchProductByOwnedBySeller= async (publicKey: string) => {
+  return await Nft.find({ owner: { $regex: `^${publicKey}$`, $options: 'i' } });
 }
 /**
  * Delete an NFT (use with caution)

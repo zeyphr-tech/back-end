@@ -13,6 +13,11 @@ const nftSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  minter: {
+    type: String,
+    required: false,
+  },
+
   listed: {
     type: Boolean,
     default: false,
@@ -36,6 +41,10 @@ const nftSchema = new mongoose.Schema({
   matchedCount: {
     type: Number,
     default: 0,
+  },
+  mintedAt: {
+    type: Date,
+    default: null,
   },
   listedAt: {
     type: Date,

@@ -72,8 +72,8 @@ export async function unlistNFT(
   
   const result = await updateNft(tokenIdStr, serialNumber, update);
   
-  if (result && result.matchedCount === 0) {
-    throw new Error("Failed to update NFT.");
+  if (!result) {
+    throw new Error("Failed to update NFT in database.");
   }
   
   return {

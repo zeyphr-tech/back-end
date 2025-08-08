@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { v4 as uuidV4 } from "uuid";
-import { bulkBuyItems } from "../services/transfer.service"; // adjust path if needed
 import { machineSchema } from "../schema/machine.schema";
 import bcrypt from "bcryptjs";
 import {
@@ -14,6 +13,7 @@ import { fetchUserByPubKey } from "../config/db";
 import { handleCustomError } from "../utils/error.util";
 import { decryptPrivateKey } from "../services/crypto.service";
 import { transferHBAR } from "../hedera";
+import { buyNFT } from "../hedera/buyNft";
 
 export const newTransaction = async (req: any, res: Response): Promise<any> => {
   try {
@@ -91,17 +91,8 @@ export const newTransaction = async (req: any, res: Response): Promise<any> => {
   }
 };
 
-export const newBulkTransaction = async (
-  req: any,
-  res: Response
-): Promise<any> => {
+export const newBulkTransaction = async (req: any, res: Response): Promise<any> => {
   try {
-    // const validatedData = machineSchema.parse(req.body);
-    // const { publicKey, _id } = req.user;
-    // if (!validatedData) {
-    //   return res.status(400).json({ error: "Invalid data" });
-    // }
-
     const { tokenIds, password, amount, paymentMethod, currency } = req.body;
     const { publicKey } = req.user;
 
@@ -115,40 +106,53 @@ export const newBulkTransaction = async (
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const decryptedPrivateKey = decryptPrivateKey(
-      user.pwdEncryptedPrivateKey,
-      password
-    );
+    const decryptedPrivateKey = decryptPrivateKey(user.pwdEncryptedPrivateKey, password);
 
-    let tx: any;
-    let transactionStatus = "success";
-    let errorMessage = "";
-    let err;
+    const results: any[] = [];
 
-    try {
-      tx = await bulkBuyItems(tokenIds, decryptedPrivateKey);
-    } catch (error: any) {
-      transactionStatus = "failure";
-      err = error;
-      errorMessage = error.message;
-    }
-    let id = uuidV4();
-    const updateTransaction_data: any = {
-      status: transactionStatus,
-      paymentMethod,
-      to: tx.to,
-      amount: amount,
-      currency,
-      errorMessage,
-      from: publicKey, // user publickey  is taken from token
-      txHash: tx?.hash || id,
-    };
+    for (const serial of tokenIds) {
+      let tx: any;
+      let status = "success";
+      let errorMessage = "";
+      let txHash = "";
 
-    await updateTransaction(id, updateTransaction_data);
+      try {
+        tx = await buyNFT(
+          process.env.NFT_COLLECTION as string,
+          serial,
+          publicKey,
+          decryptedPrivateKey
+        );
 
-    if (transactionStatus === "failure") {
-      const customError = handleCustomError(err);
-      return res.status(500).json({ message: customError.message });
+        txHash = tx?.txHash || uuidV4();
+      } catch (error: any) {
+        status = "failure";
+        errorMessage = error.message;
+        txHash = uuidV4(); // fallback if tx failed
+      }
+
+      const transactionRecord = {
+        id: uuidV4(),
+        status,
+        paymentMethod,
+        to: tx?.to || null,
+        amount,
+        currency,
+        errorMessage,
+        from: publicKey,
+        txHash,
+        tokenId: serial,
+      };
+
+      await updateTransaction(uuidV4(), transactionRecord);
+
+      // Push into results array for response
+      results.push({
+        tokenId: serial,
+        status,
+        txHash,
+        errorMessage,
+      });
     }
 
     return res.status(200).json({
@@ -156,8 +160,8 @@ export const newBulkTransaction = async (
       userEmail: user.emailAddress,
       userPublicKey: user.publicKey,
       amount,
-      txHash: tx.hash,
-      message: "Transaction successful",
+      results, // list of per-item transaction outcomes
+      message: "Bulk transaction processed",
     });
   } catch (err: any) {
     console.error("Transaction failed:", err);
@@ -167,6 +171,7 @@ export const newBulkTransaction = async (
     });
   }
 };
+
 
 // Retrieve transaction status by transactionID
 export const getTransactionStatus = async (

@@ -16,6 +16,9 @@ export async function buyNFT(
   buyerIdStr: string,
   buyerKeyStr: string
 ): Promise<{
+  txHash:string;
+  to:string;
+  from:string;
   tokenId: string;
   serialNumber: number;
   newOwner: string;
@@ -56,11 +59,8 @@ export async function buyNFT(
     .sign(buyerKey);
   
   const hbarTxRes = await hbarTx.execute(client);
-  const hbarReceipt = await hbarTxRes.getReceipt(client);
+  const txHash = hbarTxRes.transactionId.toString()
   
-  if (hbarReceipt.status !== Status.Success) {
-    throw new Error(`HBAR transfer failed: ${hbarReceipt.status}`);
-  }
   
   const nftTx = await new TransferTransaction()
     .addNftTransfer(tokenId, serialNumber, operatorId, buyerId)
@@ -74,19 +74,19 @@ export async function buyNFT(
     throw new Error(`NFT transfer failed: ${nftReceipt.status}`);
   }
   
-  await updateNft(tokenIdStr, serialNumber,
-    {
-      $set: {
+  await updateNft(tokenIdStr, serialNumber,{
         owner: buyerIdStr,
         listed: false,
         price: null,
         seller: null,
-        listedAt: null,
-      },
+        listedAt: null
     }
   );
   
   return {
+    txHash:txHash,
+    to:buyerIdStr,
+    from:sellerId.toString(),
     tokenId: tokenIdStr,
     serialNumber,
     newOwner: buyerIdStr,

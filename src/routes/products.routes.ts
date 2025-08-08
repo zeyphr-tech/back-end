@@ -8,9 +8,11 @@ import bcrypt from "bcryptjs";
 import { ethers } from "ethers";
 
 import { getContract, getReadOnlyContract } from "../services/transfer.service";
-import { fetchProducts, fetchUserByPubKey } from "../config/db";
+import { fetchProductByOwnedBySeller, fetchProducts, fetchUserByPubKey } from "../config/db";
 import { decryptPrivateKey } from "../services/crypto.service";
 import { mintToCollection } from "../hedera/mintNft";
+import { listNFT } from "../hedera/listNft";
+import { unlistNFT } from "../hedera/unlistNft";
 
 dotenv.config();
 
@@ -28,8 +30,7 @@ router.post(
   upload.single("file"),
   async (req: any, res): Promise<any> => {
     try {
-      const { title, description, quantity, amount, transferable, password } =
-        req.body;
+      const { title, description, amount, password } = req.body;
       const { publicKey } = req.user;
 
       // Validate user
@@ -97,14 +98,12 @@ router.post(
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${metaDataResponse.data.IpfsHash}`;
 
       // Mint NFT
-      const tx = await mintToCollection(
-        publicKey,
-        metaDataResponse.data,
+      const receipt = await mintToCollection(
+        process.env.NFT_COLLECTION as string,
+        Buffer.from(tokenURI),
         publicKey,
         amount
       );
-
-      const receipt = tx
 
       res.status(200).json({ success: true, data: receipt });
     } catch (err) {
@@ -123,63 +122,29 @@ router.get("/fetch-items", async (req: any, res):Promise<any> => {
     return res.status(500).json({ error: "Internal server error" });
   }
 })
-router.get("/fetch-items-by-owner", async (req: any, res):Promise<any> => {
+router.get("/fetch-items-by-owner", async (req: any, res: any): Promise<any> => {
   try {
     const { publicKey } = req.user;
-    const contract = getReadOnlyContract();
-    const total = await contract.getItemsByOwner(publicKey);
-    const ownedItems: any[] = [];
 
-    for (let i = 1; i <= total; i++) {
-      try {
-        const owner = await contract.ownerOf(i);
-        const itemData = await contract.getItems(i).catch(() => null);
-        const tokenURI = await contract.tokenURI(i);
+    // Rename to avoid shadowing Express res
+    const items = await fetchProductByOwnedBySeller(publicKey);
 
-        const isOwnedByUser = owner.toLowerCase() === publicKey.toLowerCase();
-        const isListedByUser =
-          itemData?.listed &&
-          itemData?.seller?.toLowerCase() === publicKey.toLowerCase();
+    // Map and fetch metadata
+    const ownedItems = await Promise.all(
+      items.map(async (item: any) => {
+        const metaDataResponse = await axios.get(item.metadata);
+        const image = metaDataResponse.data.image;
+        return { ...item._doc, image };
+      })
+    );
 
-        if (isOwnedByUser || isListedByUser) {
-          let image = "";
-          try {
-            const metadataRes = await fetch(tokenURI);
-            const metadata = await metadataRes.json();
-            image = metadata.image;
-          } catch (err) {
-            console.error(`Failed to fetch metadata for token ${i}:`, err);
-          }
-
-          let meatDatInfo :any =await axios.get(tokenURI)
-          const supply = await contract.getAvailableSupply(i);
-
-          ownedItems.push({
-            tokenId: i,
-            name: meatDatInfo?.data.name || "",
-            desc: meatDatInfo.data.description || "",
-            transferable: itemData?.transferable || false,
-            price: itemData?.price?.toString() || "0",
-            availableSupply: supply.toString() || 0,
-            seller: itemData?.seller || "",
-            buyer: itemData?.buyer || "",
-            sold: itemData?.sold || false,
-            listed: itemData?.listed || false,
-            tokenURI,
-            image,
-          });
-        }
-      } catch (err) {
-        console.error(`Error processing token ${i}:`, err);
-      }
-    }
-    
     return res.status(200).json({ items: ownedItems });
   } catch (err) {
     console.error("Failed to fetch items by owner:", err);
     return res.status(500).json({ error: "Failed to fetch items by owner" });
   }
 });
+
 
 router.post("/edit", async (req: any, res):Promise<any> => {
   try {
@@ -201,37 +166,34 @@ router.post("/edit", async (req: any, res):Promise<any> => {
       password
     );
 
-    const contract = getContract(decryptedPrivateKey);
 
     for (const product of changes) {
-      const { tokenId, listed, price, currentSupply, newSupply } = product;
+      const { serialNumber, listed, price } = product;
 
       // Handle listing/unlisting
       if (typeof listed === "boolean") {
         if (listed) {
-          const tx = await contract.listItem(tokenId, ethers.parseEther(price));
-          await tx.wait();
+          const tx = await listNFT(process.env.NFT_COLLECTION as string, serialNumber, price, publicKey, decryptedPrivateKey as any);
         } else {
-          const tx = await contract.unlistItem(tokenId);
-          await tx.wait();
+          const tx = await unlistNFT(process.env.NFT_COLLECTION as string, serialNumber, publicKey, decryptedPrivateKey as any);
         }
       }
 
-      // Handle supply change
-      if (
-        typeof currentSupply === "number" &&
-        typeof newSupply === "number" &&
-        currentSupply !== newSupply
-      ) {
-        const diff = newSupply - currentSupply;
-        if (diff > 0) {
-          const tx = await contract.increaseSupply(tokenId, diff);
-          await tx.wait();
-        } else {
-          const tx = await contract.burnSupply(tokenId, Math.abs(diff));
-          await tx.wait();
-        }
-      }
+      // // Handle supply change
+      // if (
+      //   typeof currentSupply === "number" &&
+      //   typeof newSupply === "number" &&
+      //   currentSupply !== newSupply
+      // ) {
+      //   const diff = newSupply - currentSupply;
+      //   if (diff > 0) {
+      //     const tx = await contract.increaseSupply(tokenId, diff);
+      //     await tx.wait();
+      //   } else {
+      //     const tx = await contract.burnSupply(tokenId, Math.abs(diff));
+      //     await tx.wait();
+      //   }
+      // }
     }
 
     return res

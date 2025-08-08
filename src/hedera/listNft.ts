@@ -21,6 +21,10 @@ export async function listNFT(
 }> {
   const tokenId = TokenId.fromString(tokenIdStr);
   const sellerId = AccountId.fromString(sellerIdStr);
+  const sellerPrivateKey =
+  sellerKey instanceof PrivateKey
+    ? sellerKey
+    : PrivateKey.fromString(sellerKey);
   
   
   const nft = await getNftByTokenAndSerial(tokenIdStr, serialNumber);
@@ -40,7 +44,7 @@ export async function listNFT(
   const transferTx = await new TransferTransaction()
     .addNftTransfer(tokenId, serialNumber, sellerId, operatorId)
     .freezeWith(client)
-      .sign(sellerKey);
+      .sign(sellerPrivateKey);
   
   const txResponse = await transferTx.execute(client);
   const receipt = await txResponse.getReceipt(client);
@@ -50,19 +54,17 @@ export async function listNFT(
   }
   
   const update = {
-    $set: {
       owner: operatorId.toString(),
       seller: sellerIdStr,
       listed: true,
       listedAt: new Date(),
-      price: price,
-    },
-  };
+      price: price
+    }
   
   const result = await updateNft(tokenIdStr, serialNumber, update);
   
-  if (result && result.modifiedCount === 0) {
-    throw new Error("Failed to update NFT listing status.");
+  if (!result) {
+    throw new Error("Failed to update NFT in the database.");
   }
   
   return {
