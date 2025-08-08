@@ -139,7 +139,7 @@ export const newBulkTransaction = async (req: any, res: Response): Promise<any> 
         amount,
         currency,
         errorMessage,
-        from: publicKey,
+        from: tx.from  || null,
         txHash,
         tokenId: serial,
       };

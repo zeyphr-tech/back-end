@@ -29,7 +29,7 @@ export async function buyNFT(
   const buyerKey = PrivateKey.fromString(buyerKeyStr);
   
   
-    const nft = await getNftByTokenAndSerial(tokenIdStr, serialNumber);
+  const nft = await getNftByTokenAndSerial(tokenIdStr, serialNumber);
   
   if (!nft || !nft.listed || !nft.price || !nft.seller) {
     throw new Error("NFT is not listed for sale.");
