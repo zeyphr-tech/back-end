@@ -3,16 +3,42 @@
 
 ## 🧠 About Zeyphr
 
-Zeyphr is our startup which we are building throughout IOTA Movethon and Hedera Hello Future Trilogy under the **DeFi / Tokenization** track. Our Mission is Web3 ecommerce gateway that removes the complexity of blockchain. From email-password logins to universal tap-and-pay, QR pay Zeyphr enables anyone to buy, sell, and transact — online or offline and also allows Business to create stable coins for their businesses - Just like Web2 !!
+**Zeyphr** is a next-generation, multi-chain commerce and payments platform bringing the power of Web3 to everyday users — without the complexity.  
+
+When users sign up, they’re instantly provisioned with a **Hedera account** (with future support for IOTA, Bitcoin, Ethereum, Solana, and more) to send, receive, and store crypto as easily as any Web2 app.  
+
+### 🚀 For Digital Creators & Sellers
+- 💳 **Integrated crypto + fiat payments**  
+- 🪙 **Custom stablecoins** for loyalty & exclusivity  
+- 🎨 **NFT support** for unique digital assets  
+- 🏪 **POS integration** for physical commerce, showcasing Hedera’s scalability  
+
+### 🛠 Under the Hood
+- 🔗 **Hedera Token Service (HTS)** for token & NFT minting and management  
+- ⏱ **Hedera Consensus Service (HCS)** for real-time product listings and updates  
+- 🔐 **Secure in-house key management**, abstracting blockchain complexity  
+
+### 🌟 Our Edge
+Frictionless onboarding, cross-chain compatibility, and loyalty programs powered by stablecoins — making Web3 commerce practical, scalable, and rewarding. 
 
 ---
 
+## ✨ Features
+
+- 🪪 **Web2-style Login:** Email + Password with Email OTP; wallets are abstracted from the user.
+
+- 📲 **Tap & Pay:** NFC-based crypto payments via physical Zeyphr card with in-store POS devices.
+- 🔍 **Scan & Pay:** QR-based payments available on web and in-store POS devices.
+- 🔐 **Secure Wallet Management:** Private keys are encrypted using user credentials and stored securely.
+- 🛒 **Decentralized Marketplace:** Buy & sell physical and digital products online or in-store.
+
+---
 
 ## 🔗 Links
 
 - [📹️ **Demo Video**](https://youtu.be/2_dmkKHpmGk?si=Itxnn4ckQVZE4EFu)
 
-- [🛠️ **Pitch Deck**](https://docs.google.com/presentation/d/1BHCd-msoeLb-_6pV9gf9d7nPe008a_EfaSwtajmkBzo/edit?usp=sharing)
+- [🛠️ **Pitch Deck**](https://docs.google.com/presentation/d/1ToWP1_WXy51SQc3bLjQ9hUUs-x2sUh4-0DLETQSlCIs/edit?usp=sharing)
 
 ---
 
@@ -23,13 +49,10 @@ Zeyphr is our startup which we are building throughout IOTA Movethon and Hedera 
 You can find the rest of the Zeyphr project codes here:
 
 - 🖥️ **POS Machine:**
-    [github.com/SriranganK/zeyphr/tree/main/pos_machine](https://bit.ly/zeyphr-pos)
+    [zeyphr-tech/posmachine](https://github.com/zeyphr-tech/posmachine)
 
 - ✨️ **Front End:**
-    [github.com/SriranganK/zeyphr-backend](https://bit.ly/zeyphr-frontend)
-
-- 📜 **Smart Contracts:**
-    [github.com/nikhilkxmar/zeyphr-contract](https://bit.ly/zeyphr-contract)
+    [zeyphr-tech/front-end](https://github.com/zeyphr-tech/front-end)
 
 ---
 
@@ -48,9 +71,12 @@ PINATA_API_KEY=
 PINATA_SECRET_API_KEY=
 JWT_SECRET=
 EMAIL_PASSKEY="YOUR-EMAIL-PASSWORD"
-RPC_URL=https://json-rpc.evm.testnet.iotaledger.net/
-CONTRACT_ADDRESS="YOUR-DEPLOYED-CONTRACT-ADDRESS"
 SECRET_KEY="THIS-IS-THE-SERVER-SECRET-KEY"
+ACCOUNT_ID=
+PRIVATE_KEY=
+NFT_COLLECTION=
+MARKETPLACE_ID=
+MARKETPLACE_KEY=
 ```
 
 ---
@@ -71,33 +97,16 @@ SECRET_KEY="THIS-IS-THE-SERVER-SECRET-KEY"
 > Create your account and experience the future of decentralized commerce with **Zeyphr**
 ---
 
-
-## 🧠 About Zeyphr
-
-Zeyphr is our submission to the IOTA Movethon under the **Payments & Consumer Applications** track. Our Mission is Web3 ecommerce gateway that removes the complexity of blockchain. From email-password logins to universal tap-and-pay, QR pay Zeyphr enables anyone to buy, sell, and transact — online or offline - Just like Web2 !!
-
----
-
-## ✨ Features
-
-- 🪪 **Web2-style Login:** Email + Password with Email OTP; wallets are abstracted from the user.
-
-- 📲 **Tap & Pay:** NFC-based crypto payments via physical Zeyphr card with in-store POS devices.
-- 🔍 **Scan & Pay:** QR-based payments available on web and in-store POS devices.
-- 🔐 **Secure Wallet Management:** Private keys are encrypted using user credentials and stored securely.
-- 🛒 **Decentralized Marketplace:** Buy & sell physical and digital products online or in-store.
-
----
 ## 🏗 Architecture
 
-![Zeyphr Architecture](https://res.cloudinary.com/dezo0vvpb/image/upload/v1746361408/zeyphr_arch_bnwsbz.jpg)
+![Zeyphr Architecture](https://res.cloudinary.com/djeteilo6/image/upload/v1754685065/zeyphr_arch_allhedera_w4lkdq.jpg)
 
 ---
 ## 🛠️ Tech Stack
 
-- **Frontend:** ReactJS , Shadcn, ethers.js
+- **Frontend:** ReactJS , Shadcn
 - **Backend:** Node.js with Express , Flask
 - **Database:** MongoDB
-- **Blockchain:** IOTA EVM, Solidity, Pinata(IPFS)
+- **Blockchain:** Hashgraph Hedera, IOTA EVM, Solidity, Pinata(IPFS)
 - **POS Machine**: IOT, Python, Shell Script, ReactJS
 - **POS Hardware**: Raspberry Pi 5, Display(XPT2046), NFC Sensor(PN532)
