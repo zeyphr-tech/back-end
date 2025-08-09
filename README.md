@@ -36,7 +36,7 @@ Frictionless onboarding, cross-chain compatibility, and loyalty programs powered
 
 ## 🔗 Links
 
-- [📹️ **Demo Video**](https://youtu.be/2_dmkKHpmGk?si=Itxnn4ckQVZE4EFu)
+- [📹️ **Demo Video**](https://youtu.be/4tBzsMtCX_4)
 
 - [🛠️ **Pitch Deck**](https://docs.google.com/presentation/d/1ToWP1_WXy51SQc3bLjQ9hUUs-x2sUh4-0DLETQSlCIs/edit?usp=sharing)
 
@@ -49,10 +49,10 @@ Frictionless onboarding, cross-chain compatibility, and loyalty programs powered
 You can find the rest of the Zeyphr project codes here:
 
 - 🖥️ **POS Machine:**
-    [zeyphr-tech/posmachine](https://github.com/zeyphr-tech/posmachine)
+    [zeyphr-tech/posmachine/tree/hf-origins](https://github.com/zeyphr-tech/posmachine/tree/hf-origins)
 
 - ✨️ **Front End:**
-    [zeyphr-tech/front-end](https://github.com/zeyphr-tech/front-end)
+    [zeyphr-tech/front-end/tree/hf-origins](https://github.com/zeyphr-tech/front-end/tree/hf-origins)
 
 ---
 
@@ -107,6 +107,6 @@ MARKETPLACE_KEY=
 - **Frontend:** ReactJS , Shadcn
 - **Backend:** Node.js with Express , Flask
 - **Database:** MongoDB
-- **Blockchain:** Hashgraph Hedera, IOTA EVM, Solidity, Pinata(IPFS)
-- **POS Machine**: IOT, Python, Shell Script, ReactJS
+- **Blockchain:** Hashgraph Hedera, Pinata(IPFS)
+- **POS Machine**: Python, Shell Script, ReactJS
 - **POS Hardware**: Raspberry Pi 5, Display(XPT2046), NFC Sensor(PN532)
